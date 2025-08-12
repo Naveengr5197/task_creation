@@ -82,6 +82,7 @@ export class TaskViewComponent implements OnInit {
   }
 
   onLogoutClick() {
+    console.log('Logging out...');
     this.authService.logout();
   }
 }
