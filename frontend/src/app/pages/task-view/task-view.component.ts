@@ -87,6 +87,15 @@ export class TaskViewComponent implements OnInit {
       .subscribe((res: any) => {
         this.tasks = this.tasks.filter((val) => val._id !== id);
         this.deletingTaskId = null;
+        // Recalculate total amount after deletion
+        this.sumOfAmount = 0;
+        if (this.tasks.length === 0) {
+          this.viewTotal = false;
+        } else {
+          this.tasks.forEach((task) => {
+            this.sumOfAmount += task.amount;
+          });
+        }
       });
   }
 
