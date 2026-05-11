@@ -23,6 +23,13 @@ export class EditTaskComponent implements OnInit {
         console.log('param', params);
       }
     )
+    this.getTask();
+  }
+
+  getTask(){
+      this.taskService.getTaskById(this.listId, this.taskId).subscribe((task) => {
+        console.log('task', task);
+      })
   }
 
   updateTask(title: string, amount: number) {

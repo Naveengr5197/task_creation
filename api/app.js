@@ -188,6 +188,16 @@ app.get('/lists/:listId/tasks', authenticate, (req, res) => {
     })
 });
 
+app.get('/lists/:listId/tasks/:taskId', authenticate, (req, res) => {
+    // We want to return all tasks that belong to a specific list (specified by listId)
+    Task.find({
+        _listId: req.params.listId
+    }).then((tasks) => {
+        res.send(tasks);
+    })
+});
+
+
 
 /**
  * POST /lists/:listId/tasks
