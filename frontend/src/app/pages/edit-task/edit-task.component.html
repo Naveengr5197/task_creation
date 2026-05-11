@@ -5,7 +5,7 @@
       </h1>
 
       <div *ngIf="isLoadingData" class="loading-spinner"></div>
-      <div *ngIf="!isLoadingData">
+      <div [hidden]="isLoadingData">
         <div class="field">
           <input #taskTitleInput class="input has-background-light is-medium" type="text" placeholder="Enter task name..." [value]="taskTitle || ''">
         </div>
