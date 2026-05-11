@@ -3,14 +3,15 @@
       <h1 class="title">
         Edit list
       </h1>
-  
-      <input #listTitleInput class="input has-background-light is-medium" type="text" placeholder="Enter list name...">
-      <br><br>
+
+      <div *ngIf="isLoadingData" class="loading-spinner"></div>
+      <div class="field" *ngIf="!isLoadingData">
+        <input #listTitleInput class="input has-background-light is-medium" type="text" placeholder="Enter list name..." [value]="listTitle || ''">
+      </div>
+      <br>
       <div class="buttons is-right">
         <button class="button is-medium" routerLink="/">Cancel</button>
-        <button class="button is-primary has-text-white is-medium" (click)="updateList(listTitleInput.value)">Save</button>
+        <button class="button is-primary has-text-white is-medium" [class.is-loading]="isLoading" [disabled]="isLoading || isLoadingData" (click)="updateList(listTitleInput.value)">Save</button>
       </div>
-  
-      
     </div>
   </div>

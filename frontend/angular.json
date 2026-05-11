@@ -24,12 +24,9 @@
             "tsConfig": "src/tsconfig.app.json",
             "assets": ["src/favicon.ico", "src/assets"],
             "styles": [
-              "src/styles.scss",
-              "./node_modules/bootstrap/dist/css/bootstrap.min.css"
+              "src/styles.scss"
             ],
-            "scripts": [
-              "./node_modules/bootstrap/dist/js/bootstrap.js"
-            ]
+            "scripts": []
           },
           "configurations": {
             "production": {

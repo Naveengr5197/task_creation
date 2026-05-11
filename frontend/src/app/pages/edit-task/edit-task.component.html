@@ -4,12 +4,19 @@
         Edit task
       </h1>
 
-      <input #taskTitleInput class="input has-background-light is-medium" type="text" placeholder="Enter task name...">
-      <input #amountTitleInput class="input has-background-light is-medium" type="text" placeholder="Enter amount...">
-      <br><br>
+      <div *ngIf="isLoadingData" class="loading-spinner"></div>
+      <div *ngIf="!isLoadingData">
+        <div class="field">
+          <input #taskTitleInput class="input has-background-light is-medium" type="text" placeholder="Enter task name..." [value]="taskTitle || ''">
+        </div>
+        <div class="field">
+          <input #amountTitleInput class="input has-background-light is-medium" type="number" placeholder="Enter amount..." [value]="taskAmount || ''">
+        </div>
+      </div>
+      <br>
       <div class="buttons is-right">
         <button class="button is-medium" (click)="onCancelClicked()">Cancel</button>
-        <button class="button is-primary has-text-white is-medium" (click)="updateTask(taskTitleInput.value, amountTitleInput.value)">Save</button>
+        <button class="button is-primary has-text-white is-medium" [class.is-loading]="isLoading" [disabled]="isLoading || isLoadingData" (click)="updateTask(taskTitleInput.value, amountTitleInput.value)">Save</button>
       </div>
     </div>
   </div>

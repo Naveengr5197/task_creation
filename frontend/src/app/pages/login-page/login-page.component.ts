@@ -12,17 +12,20 @@ export class LoginPageComponent implements OnInit {
 
   constructor(private authService: AuthService, private router: Router) { }
 
+  isLoading: boolean = false;
+
   ngOnInit() {
   }
 
   onLoginButtonClicked(email: string, password: string) {
+    this.isLoading = true;
     this.authService.login(email, password).subscribe((res: HttpResponse<any>) => {
+      this.isLoading = false;
       if (res.status === 200) {
-        // we have logged in successfully
         this.router.navigate(['/lists']);
       }
-      console.log(res);
-
+    }, (err) => {
+      this.isLoading = false;
     });
   }
 

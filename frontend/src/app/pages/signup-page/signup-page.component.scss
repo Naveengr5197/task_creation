@@ -1,0 +1,27 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.white-box {
+  background: #2c3e50 !important;
+}
+
+.input {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: white;
+
+  &::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+  }
+
+  &:focus {
+    border-color: #4bd8e7;
+    box-shadow: 0 0 0 2px rgba(75, 216, 231, 0.2);
+  }
+}
+
+.icon {
+  color: rgba(255, 255, 255, 0.5) !important;
+}

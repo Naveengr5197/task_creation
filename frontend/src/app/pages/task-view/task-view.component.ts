@@ -19,6 +19,10 @@ export class TaskViewComponent implements OnInit {
   gotTasksData: Task[];
   sumOfAmount: number = 0;
   viewTotal: boolean = false;
+  isLoadingLists: boolean = true;
+  isLoadingTasks: boolean = false;
+  isDeletingList: boolean = false;
+  deletingTaskId: string = null;
 
   constructor(
     private taskService: TaskService,
@@ -33,8 +37,10 @@ export class TaskViewComponent implements OnInit {
     this.route.params.subscribe((params: Params) => {
       if (params.listId) {
         this.selectedListId = params.listId;
+        this.isLoadingTasks = true;
         this.taskService.getTasks(params.listId).subscribe((tasks: Task[]) => {
           this.tasks = tasks;
+          this.isLoadingTasks = false;
           this.sumOfAmount = 0;
           if (this.tasks.length == 0) {
             this.viewTotal = false;
@@ -53,6 +59,7 @@ export class TaskViewComponent implements OnInit {
 
     this.taskService.getLists().subscribe((lists: List[]) => {
       this.lists = lists;
+      this.isLoadingLists = false;
     });
   }
 
@@ -66,18 +73,20 @@ export class TaskViewComponent implements OnInit {
   }
 
   onDeleteListClick() {
+    this.isDeletingList = true;
     this.taskService.deleteList(this.selectedListId).subscribe((res: any) => {
+      this.isDeletingList = false;
       this.router.navigate(["/lists"]);
-      console.log(res);
     });
   }
 
   onDeleteTaskClick(id: string) {
+    this.deletingTaskId = id;
     this.taskService
       .deleteTask(this.selectedListId, id)
       .subscribe((res: any) => {
         this.tasks = this.tasks.filter((val) => val._id !== id);
-        console.log(res);
+        this.deletingTaskId = null;
       });
   }
 

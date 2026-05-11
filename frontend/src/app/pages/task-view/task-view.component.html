@@ -1,59 +1,21 @@
-<!-- profile details -->
-<!-- Optimized Profile Dropdown -->
-<!-- <div class="profile-container">
-  <div class="top-bar">
-    <h1 class="title has-text-white"></h1>
-
-    <div class="dropdown" (mouseenter)="showDropdown()" (mouseleave)="hideDropdown()">
-      <button class="dropdown-button" aria-label="User menu" (click)="toggleDropdown()">
-        <span class="user-icon">
-          <i class="fas fa-user"></i>
-        </span>
-      </button>
-
-      <div class="dropdown-menu" [class.is-active]="isDropdownOpen" @fadeInOut>
-        <div class="dropdown-content">
-          <a routerLink="/profile" class="dropdown-item">
-            <i class="fas fa-user-circle"></i> Profile
-          </a>
-          <a (click)="onLogoutClick()" class="dropdown-item is-danger">
-            <i class="fas fa-sign-out-alt"></i> Logout
-          </a>
-        </div>
-      </div>
-    </div>
+<!-- Profile / Logout Bar -->
+<div class="profile-bar">
+  <div class="profile-bar-content">
+    <span class="app-title">Task Manager</span>
+    <button class="button is-medium is-danger" (click)="onLogoutClick()">
+      <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
+      <span>Logout</span>
+    </button>
   </div>
-</div> -->
-
-
-<div class="profile-container">
-  <ul class="nav navbar-nav navbar-left">
-    <li style="margin-right: 20px" class="dropdown" >
-      <a data-toggle="dropdown" >
-        <i class="fas fa-user-circle"></i> Profile
-
-      </a>
-      <a (click)="onLogoutClick()" class="color-white"><span
-          style="font-size: 14px;font-weight: bolder;text-align: center;margin-right: 5px;">Logout</span></a>
-      <ul style="margin-right:-15px;margin-top: 8px;" class="dropdown-menu home-dropdown">
-        <li></li>
-        <!-- <li style="text-align: center;">{{userName}}</li> -->
-        <li class="text-center">
-        </li>
-      </ul>
-    </li>
-  </ul>
 </div>
-
-<!--  -->
-
 
 <div class="centered-content">
   <div class="task-manager-container">
     <div class="sidebar">
-      <h1 class="title has-text-primary">Lists</h1>
+      <h1 class="title has-text-white">Lists</h1>
 
       <div class="list-menu">
+        <div *ngIf="isLoadingLists" class="loading-spinner-small"></div>
         <a
           class="list-menu-item"
           *ngFor="let list of lists"
@@ -64,7 +26,7 @@
         </a>
       </div>
 
-      <button class="button is-primary has-text-white" routerLink="/new-list">
+      <button class="button is-success has-text-white" routerLink="/new-list">
         + New List
       </button>
     </div>
@@ -72,11 +34,11 @@
     <div class="task-list-container">
       <div *ngIf="tasks">
         <div class="top-bar">
-          <h1 class="title has-text-primary">Tasks</h1>
+          <h1 class="title has-text-white">Tasks</h1>
           <div class="dropdown is-hoverable is-right">
             <div class="dropdown-trigger">
               <button
-                class="button"
+                class="button is-light"
                 aria-haspopup="true"
                 aria-controls="dropdown-menu4"
               >
@@ -91,94 +53,87 @@
                   [routerLink]="['/edit-list', selectedListId]"
                   class="dropdown-item"
                 >
-                  Edit
+                  Edit List
                 </a>
                 <a
                   (click)="onDeleteListClick()"
                   class="dropdown-item has-text-danger"
+                  [class.is-loading]="isDeletingList"
                 >
-                  Delete
+                  {{ isDeletingList ? 'Deleting...' : 'Delete List' }}
                 </a>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Task Elements -->
-        <div
-          class="task"
-          *ngFor="let task of tasks"
-          [ngClass]="{ completed: task.completed }"
-        >
-          <table class="table">
+        <!-- Loading Tasks -->
+        <div *ngIf="isLoadingTasks" class="loading-spinner"></div>
+
+        <!-- Tasks Table -->
+        <div class="task-table-wrapper" *ngIf="!isLoadingTasks && tasks.length > 0">
+          <table class="table is-fullwidth is-striped is-hoverable">
             <thead>
               <tr>
+                <th>Status</th>
                 <th>Name</th>
                 <th>Amount</th>
+                <th>Actions</th>
               </tr>
             </thead>
             <tbody>
-              <tr>
+              <tr *ngFor="let task of tasks" [class.completed]="task.completed">
                 <td>
-                  {{ task.title }}
+                  <span class="icon is-small" style="cursor: pointer" (click)="onTaskClick(task)">
+                    <i class="far" [ngClass]="task.completed ? 'fa-check-circle has-text-success' : 'fa-circle'"></i>
+                  </span>
                 </td>
+                <td [class.task-done]="task.completed">{{ task.title }}</td>
+                <td [class.task-done]="task.completed">{{ task.amount }}</td>
                 <td>
-                  {{ task.amount }}
+                  <button
+                    class="button is-small is-info"
+                    [routerLink]="['/lists', selectedListId, 'edit-task', task._id]"
+                  >
+                    <span class="icon is-small"><i class="fas fa-edit"></i></span>
+                  </button>
+                  <button
+                    class="button is-small is-danger"
+                    [class.is-loading]="deletingTaskId === task._id"
+                    (click)="onDeleteTaskClick(task._id)"
+                    style="margin-left: 5px"
+                  >
+                    <span class="icon is-small"><i class="fas fa-trash"></i></span>
+                  </button>
                 </td>
               </tr>
             </tbody>
-          </table>
-
-          <div class="" style="display: flex; float: left">
-            <div class="task-buttons">
-              <button
-                class="button"
-                [routerLink]="['/lists', selectedListId, 'edit-task', task._id]"
-              >
-                <div class="icon">
-                  <i class="fas fa-edit"></i>
-                </div>
-              </button>
-
-              <button
-                class="button is-danger"
-                (click)="onDeleteTaskClick(task._id)"
-                style="margin-left: 10px"
-              >
-                <div class="icon">
-                  <i class="fas fa-trash"></i>
-                </div>
-              </button>
-            </div>
-          </div>
-        </div>
-        <div *ngIf="viewTotal" class="task">
-          <table class="table">
-            <thead>
+            <tfoot *ngIf="viewTotal">
               <tr>
-                <th>Total</th>
-                <th>{{ sumOfAmount }}</th>
+                <td></td>
+                <td><strong>Total</strong></td>
+                <td><strong>{{ sumOfAmount }}</strong></td>
+                <td></td>
               </tr>
-            </thead>
+            </tfoot>
           </table>
         </div>
-        <h3 class="empty-state-text" *ngIf="tasks.length === 0">
-          There are no tasks here! Click the add button to create a new task.
+
+        <h3 class="empty-state-text" *ngIf="!isLoadingTasks && tasks.length === 0">
+          There are no tasks here! Click the + button to create a new task.
         </h3>
+
         <button
           routerLink="./new-task"
           class="circle-add-button button is-primary"
         >
-          <img src="../../../assets/plus-icon.svg" class="has-text-white" />
+          <span class="icon"><i class="fas fa-plus"></i></span>
         </button>
       </div>
 
       <div *ngIf="!tasks">
         <h3 class="empty-state-text">Please select a list from the sidebar</h3>
       </div>
-      <!--  -->
-
-      <!--  -->
     </div>
   </div>
 </div>

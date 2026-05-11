@@ -12,14 +12,18 @@ export class NewListComponent implements OnInit {
 
   constructor(private taskService: TaskService, private router: Router) { }
 
+  isLoading: boolean = false;
+
   ngOnInit() {
   }
 
   createList(title: string) {
+    this.isLoading = true;
     this.taskService.createList(title).subscribe((list: List) => {
-      console.log(list);
-      // Now we navigate to /lists/task._id
-      this.router.navigate([ '/lists', list._id ]); 
+      this.isLoading = false;
+      this.router.navigate([ '/lists', list._id ]);
+    }, (err) => {
+      this.isLoading = false;
     });
   }
 

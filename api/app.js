@@ -189,12 +189,14 @@ app.get('/lists/:listId/tasks', authenticate, (req, res) => {
 });
 
 app.get('/lists/:listId/tasks/:taskId', authenticate, (req, res) => {
-    // We want to return all tasks that belong to a specific list (specified by listId)
-    Task.find({
+    Task.findOne({
+        _id: req.params.taskId,
         _listId: req.params.listId
-    }).then((tasks) => {
-        res.send(tasks);
-    })
+    }).then((task) => {
+        res.send(task);
+    }).catch((e) => {
+        res.status(404).send(e);
+    });
 });
 
 
@@ -401,6 +403,8 @@ let deleteTasksFromList = (_listId) => {
 
 
 
-app.listen(3000, () => {
-    console.log("Server is listening on port 3000");
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, () => {
+    console.log("Server is listening on port " + PORT);
 })

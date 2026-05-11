@@ -12,14 +12,19 @@ export class SignupPageComponent implements OnInit {
 
   constructor(private authService: AuthService, private router: Router) { }
 
+  isLoading: boolean = false;
+
   ngOnInit() {
   }
 
   onSignupButtonClicked(email: string, password: string) {
+    this.isLoading = true;
     this.authService.signup(email, password).subscribe((res: HttpResponse<any>) => {
-      console.log(res, "response");
+      this.isLoading = false;
       this.router.navigate(['/lists']);
-    })
+    }, (err) => {
+      this.isLoading = false;
+    });
   }
 
 }

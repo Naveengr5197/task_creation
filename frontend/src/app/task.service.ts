@@ -24,7 +24,7 @@ export class TaskService {
     return this.webReqService.patch(`lists/${id}`, { title });
   }
 
-  updateTask(listId: string, taskId: string, title: string, amount) {
+  updateTask(listId: string, taskId: string, title: string, amount: number) {
     // We want to send a web request to update a list
     return this.webReqService.patch(`lists/${listId}/tasks/${taskId}`, { title, amount });
   }

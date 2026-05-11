@@ -13,6 +13,7 @@ export class NewTaskComponent implements OnInit {
   constructor(private taskService: TaskService, private route: ActivatedRoute, private router: Router) { }
 
   listId: string;
+  isLoading: boolean = false;
 
   ngOnInit() {
     this.route.params.subscribe(
@@ -23,9 +24,13 @@ export class NewTaskComponent implements OnInit {
   }
 
   createTask(title: string, amount: number) {
+    this.isLoading = true;
     this.taskService.createTask(title, amount, this.listId).subscribe((newTask: Task) => {
+      this.isLoading = false;
       this.router.navigate(['../'], { relativeTo: this.route });
-    })
+    }, (err) => {
+      this.isLoading = false;
+    });
   }
 
   onCancelClicked(){

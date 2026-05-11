@@ -1,5 +1,3 @@
-import { MatTableModule } from 'angular-material-data-table';
-
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
@@ -25,7 +23,6 @@ import { EditTaskComponent } from './pages/edit-task/edit-task.component';
     LoginPageComponent,
     SignupPageComponent,
     EditListComponent,
-
     EditTaskComponent,
   ],
   imports: [

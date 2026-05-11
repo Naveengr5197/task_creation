@@ -8,9 +8,9 @@
     <br><br>
     <div class="buttons is-right">
       <button class="button is-medium" routerLink="/">Cancel</button>
-      <button class="button is-primary has-text-white is-medium" (click)="createList(listTitleInput.value)">Create</button>
+      <button class="button is-primary has-text-white is-medium" [class.is-loading]="isLoading" [disabled]="isLoading" (click)="createList(listTitleInput.value)">Create</button>
     </div>
 
-    
+
   </div>
 </div>

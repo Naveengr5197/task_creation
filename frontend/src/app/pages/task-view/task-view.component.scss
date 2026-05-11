@@ -1,21 +1,65 @@
 @import "../../../main-styles.scss";
 
+.profile-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 50px;
+  background: rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(10px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+
+  .profile-bar-content {
+    width: 100%;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .app-title {
+    color: white;
+    font-family: 'Lato', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+}
+
 .task-manager-container {
   display: flex;
   width: 100%;
-  height: 100%;
+  height: calc(100vh - 100px);
   max-width: 1000px;
   max-height: 680px;
+  margin-top: 50px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .sidebar {
   display: flex;
   flex-direction: column;
-  width: 250px;
-  background: linear-gradient(135deg, #d4fc79, #2d2f2e);
-  padding: 42px;
-  border-top-left-radius: 8px;
-  border-bottom-left-radius: 8px;
+  width: 260px;
+  min-width: 260px;
+  background: #2c3e50;
+  padding: 30px 20px;
+
+  .title {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+
+  .button {
+    margin-top: 15px;
+  }
 }
 
 .task-list-container {
@@ -23,37 +67,19 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-  padding: 22px;
-  background: linear-gradient(135deg, #46463f, #24fe41);
-
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+  padding: 25px;
+  background: #ffffff;
+  overflow-y: auto;
 
   .top-bar {
     margin-bottom: 20px;
     display: flex;
-    .title {
-      flex-grow: 1;
-      margin: 0;
-    }
-  }
-}
-.profile-container {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  padding-right: 12px;
-  padding-top: 12px;
-  border-top-right-radius: 8px;
-  border-bottom-right-radius: 8px;
+    align-items: center;
 
-  .top-bar {
-    margin-bottom: 20px;
-    display: flex;
     .title {
       flex-grow: 1;
       margin: 0;
+      color: #2c3e50;
     }
   }
 }
@@ -63,95 +89,92 @@
   flex-direction: column;
   margin-top: 15px;
   flex-grow: 1;
+  overflow-y: auto;
 
   .list-menu-item {
     display: flex;
-
     align-items: center;
     padding: 10px 15px;
     border-radius: 5px;
-
     width: 100%;
-    color: #5f5f5f;
+    color: #bdc3c7;
     margin-bottom: 5px;
+    text-decoration: none;
+    transition: background 0.2s, color 0.2s;
 
     &:hover {
-      background: $light;
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
     }
 
     &.is-active {
-      background-color: #cff8ef;
-      color: $dark-green;
+      background: rgba(255, 255, 255, 0.15);
+      color: white;
+      font-weight: bold;
+    }
+
+    p {
+      margin: 0;
     }
   }
 }
 
-.task {
-  display: flex;
-  background: white;
-  padding: 15px 20px;
-  border-radius: 5px;
-  margin-top: 10px;
+.task-table-wrapper {
+  .table {
+    background: transparent;
+    border-radius: 5px;
+    overflow: hidden;
 
-  align-items: center;
-
-  &:not(.complete) {
-    cursor: pointer;
-    transition: box-shadow 0.2s ease, transform 0.2s ease;
-
-    &:active {
-      transform: scale(0.95);
+    thead th {
+      background: #f5f5f5;
+      color: #2c3e50;
+      border-bottom: 2px solid #e0e0e0;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    &:hover {
-      box-shadow: 0 0 0 5px #eeeeee;
+    tbody tr {
+      transition: background 0.15s;
 
-      .task-buttons {
-        opacity: 1;
-        transform: scale(1);
+      &:hover {
+        background: #f9f9f9;
+      }
+
+      &.completed {
+        opacity: 0.6;
       }
     }
-  }
 
-  &.completed .task-text {
-    text-decoration: line-through;
-    opacity: 0.8;
-  }
-
-  .task-text {
-    display: flex;
-    flex-grow: 1;
-  }
-
-  .task-buttons {
-    transition: opacity 0.2s, transform 0.2s;
-    opacity: 0;
-    transform: scale(0.85);
+    .task-done {
+      text-decoration: line-through;
+      color: #999;
+    }
   }
 }
 
 .circle-add-button {
   position: absolute;
-  bottom: 35px;
-  right: 35px;
+  bottom: 25px;
+  right: 25px;
   height: 50px;
   width: 50px;
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
 }
 
 .empty-state-text {
-  font-size: 20px;
-  color: #777;
+  font-size: 18px;
+  color: #999;
   text-align: center;
-}
-
-
-.task-list-container {
-  background-image: url('https://www.pexels.com/video/video-of-a-forest-8533302/');
-  background-size: cover; /* This will make the image cover the entire container */
-  background-position: center; /* Center the image */
-  background-repeat: no-repeat; /* Prevent the image from repeating */
-  padding: 20px; /* Add some padding if needed */
-  border-radius: 8px; /* Optional: Add rounded corners */
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Optional: Add a shadow for better visibility */
+  margin-top: 60px;
 }

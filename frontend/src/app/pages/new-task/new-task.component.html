@@ -4,14 +4,16 @@
       Create a new task
     </h1>
 
-    <input #UsernameInput class="input has-background-light is-medium" type="text" placeholder="Enter Name...">
-    <input #amountInput class="input has-background-light is-medium" type="number" placeholder="Enter Amount...">
-    <br><br>
-    <div class="buttons is-right">
-      <button class="button is-medium"(click)="onCancelClicked()">Cancel</button>
-      <button class="button is-primary has-text-white is-medium" (click)="createTask(UsernameInput.value, amountInput.value)">Add</button>
+    <div class="field">
+      <input #UsernameInput class="input has-background-light is-medium" type="text" placeholder="Enter Name...">
     </div>
-
-
+    <div class="field">
+      <input #amountInput class="input has-background-light is-medium" type="number" placeholder="Enter Amount...">
+    </div>
+    <br>
+    <div class="buttons is-right">
+      <button class="button is-medium" (click)="onCancelClicked()">Cancel</button>
+      <button class="button is-primary has-text-white is-medium" [class.is-loading]="isLoading" [disabled]="isLoading" (click)="createTask(UsernameInput.value, amountInput.value)">Add</button>
+    </div>
   </div>
 </div>

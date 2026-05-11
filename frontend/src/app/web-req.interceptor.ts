@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpInterceptor, HttpRequest, HttpHandler, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, empty, Subject } from 'rxjs';
+import { Observable, throwError, EMPTY, Subject } from 'rxjs';
 import { AuthService } from './auth.service';
 import { catchError, tap, switchMap } from 'rxjs/operators';
 
@@ -38,7 +38,7 @@ export class WebReqInterceptor implements HttpInterceptor {
               catchError((err: any) => {
                 console.log(err);
                 this.authService.logout();
-                return empty();
+                return EMPTY;
               })
             )
         }
