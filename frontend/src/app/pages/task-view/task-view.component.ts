@@ -23,6 +23,7 @@ export class TaskViewComponent implements OnInit {
   isLoadingTasks: boolean = false;
   isDeletingList: boolean = false;
   deletingTaskId: string = null;
+  isSidebarOpen: boolean = false;
 
   constructor(
     private taskService: TaskService,

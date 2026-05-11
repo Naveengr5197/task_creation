@@ -1,17 +1,23 @@
 <!-- Profile / Logout Bar -->
 <div class="profile-bar">
   <div class="profile-bar-content">
+    <button class="hamburger-btn" (click)="isSidebarOpen = !isSidebarOpen">
+      <span class="icon"><i class="fas" [ngClass]="isSidebarOpen ? 'fa-times' : 'fa-bars'"></i></span>
+    </button>
     <span class="app-title">Task Manager</span>
-    <button class="button is-medium is-danger" (click)="onLogoutClick()">
+    <button class="button is-small is-danger logout-btn" (click)="onLogoutClick()">
       <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
-      <span>Logout</span>
+      <span class="logout-text">Logout</span>
     </button>
   </div>
 </div>
 
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" [class.is-active]="isSidebarOpen" (click)="isSidebarOpen = false"></div>
+
 <div class="centered-content">
   <div class="task-manager-container">
-    <div class="sidebar">
+    <div class="sidebar" [class.is-open]="isSidebarOpen">
       <h1 class="title has-text-white">Lists</h1>
 
       <div class="list-menu">
@@ -21,12 +27,13 @@
           *ngFor="let list of lists"
           [routerLink]="['/lists', list._id]"
           routerLinkActive="is-active"
+          (click)="isSidebarOpen = false"
         >
           <p>{{ list.title }}</p>
         </a>
       </div>
 
-      <button class="button is-success has-text-white" routerLink="/new-list">
+      <button class="button is-success has-text-white" routerLink="/new-list" (click)="isSidebarOpen = false">
         + New List
       </button>
     </div>

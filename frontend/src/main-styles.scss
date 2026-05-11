@@ -116,3 +116,20 @@ a {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+// ─── Mobile responsive ────────────────────────────────────────────────────
+
+@media (max-width: 600px) {
+  .white-box {
+    width: calc(100vw - 32px);
+    max-width: calc(100vw - 32px);
+    padding: 24px 20px;
+    border-radius: 8px;
+  }
+
+  .modal-box {
+    width: calc(100vw - 32px);
+    padding: 24px 20px;
+    border-radius: 8px;
+  }
+}
