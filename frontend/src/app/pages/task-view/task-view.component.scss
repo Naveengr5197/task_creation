@@ -75,11 +75,12 @@
     margin-bottom: 20px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
 
-    .title {
-      flex-grow: 1;
-      margin: 0;
-      color: #2c3e50;
+    .top-bar-right {
+      display: flex;
+      align-items: center;
+      gap: 8px;
     }
   }
 }
@@ -153,23 +154,8 @@
   }
 }
 
-.circle-add-button {
-  position: absolute;
-  bottom: 25px;
-  right: 25px;
-  height: 50px;
-  width: 50px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-  transition: transform 0.2s, box-shadow 0.2s;
-
-  &:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-  }
+.add-task-btn {
+  font-weight: 600;
 }
 
 .empty-state-text {
@@ -301,14 +287,6 @@
         padding: 8px 10px;
       }
     }
-  }
-
-  // Add task button
-  .circle-add-button {
-    bottom: 20px;
-    right: 16px;
-    height: 44px;
-    width: 44px;
   }
 
   .empty-state-text {
