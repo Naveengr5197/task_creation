@@ -3,7 +3,7 @@
 const mongoose = require('mongoose');
 
 mongoose.Promise = global.Promise;
-mongoose.connect('mongodb+srv://naveen:naveen@cluster0.lkfxh4a.mongodb.net/', {
+mongoose.connect(process.env.MONGODB_URI || 'mongodb+srv://naveen:naveen@cluster0.lkfxh4a.mongodb.net/', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => {
