@@ -18,7 +18,7 @@ const UserSchema = new mongoose.Schema({
     },
     username: {
         type: String,
-        required: true,
+        required: false,
         trim: true
     },
     password: {
@@ -175,7 +175,7 @@ let saveSessionToDatabase = (user, refreshToken) => {
 
         user.sessions.push({ 'token': refreshToken, expiresAt });
 
-        user.save().then(() => {
+        user.save({ validateBeforeSave: false }).then(() => {
             // saved session successfully
             return resolve(refreshToken);
         }).catch((e) => {

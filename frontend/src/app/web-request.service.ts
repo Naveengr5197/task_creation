@@ -38,8 +38,9 @@ export class WebRequestService {
       });
   }
 
-  signup(email: string, password: string) {
+  signup(username: string, email: string, password: string) {
     return this.http.post(`${this.ROOT_URL}/users`, {
+      username,
       email,
       password
     }, {
