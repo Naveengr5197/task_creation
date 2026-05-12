@@ -24,6 +24,7 @@ export class TaskViewComponent implements OnInit {
   isDeletingList: boolean = false;
   deletingTaskId: string = null;
   isSidebarOpen: boolean = false;
+  userName: string = '';
 
   constructor(
     private taskService: TaskService,
@@ -35,6 +36,7 @@ export class TaskViewComponent implements OnInit {
 
   //
   ngOnInit() {
+    this.userName = this.authService.getUserName() || 'User';
     this.route.params.subscribe((params: Params) => {
       if (params.listId) {
         this.selectedListId = params.listId;
@@ -103,5 +105,31 @@ export class TaskViewComponent implements OnInit {
   onLogoutClick() {
     console.log('Logging out...');
     this.authService.logout();
+  }
+
+  exportToCSV() {
+    if (!this.tasks || this.tasks.length === 0) return;
+
+    const headers = ['Name', 'Amount'];
+    const rows = this.tasks.map(t => [
+      `"${(t.title || '').replace(/"/g, '""')}"`,
+      t.amount
+    ]);
+
+    if (this.viewTotal) {
+      rows.push(['Total', this.sumOfAmount] as any);
+    }
+
+    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
+    const selectedList = this.lists && this.lists.find(l => l._id === this.selectedListId);
+    const fileName = selectedList ? `${selectedList.title}.csv` : 'tasks.csv';
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 }

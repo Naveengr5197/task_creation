@@ -265,7 +265,8 @@ app.patch('/lists/:listId/tasks/:taskId', authenticate, (req, res) => {
                 _listId: req.params.listId
             }, {
                     $set: req.body
-                }
+                },
+                { runValidators: false }
             ).then(() => {
                 res.send({ message: 'Updated successfully.' })
             })

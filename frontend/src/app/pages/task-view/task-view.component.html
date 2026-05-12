@@ -5,10 +5,24 @@
       <span class="icon"><i class="fas" [ngClass]="isSidebarOpen ? 'fa-times' : 'fa-bars'"></i></span>
     </button>
     <span class="app-title">Task Manager</span>
-    <button class="button is-small is-danger logout-btn" (click)="onLogoutClick()">
-      <span class="icon"><i class="fas fa-sign-out-alt"></i></span>
-      <span class="logout-text">Logout</span>
-    </button>
+    <div class="profile-menu">
+      <div class="dropdown is-hoverable is-right">
+        <div class="dropdown-trigger">
+          <button class="button is-white is-small profile-btn">
+            <span class="icon is-small"><i class="fas fa-user-circle"></i></span>
+            <span class="user-name">{{ userName }}</span>
+          </button>
+        </div>
+        <div class="dropdown-menu" role="menu">
+          <div class="dropdown-content">
+            <a class="dropdown-item has-text-danger" (click)="onLogoutClick()">
+              <span class="icon is-small"><i class="fas fa-sign-out-alt"></i></span>
+              <span>Logout</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -49,6 +63,15 @@
             <span>New Task</span>
           </button>
           <div class="top-bar-right">
+          <button
+            class="button is-info is-small export-btn"
+            (click)="exportToCSV()"
+            [disabled]="!tasks || tasks.length === 0"
+            title="Export to CSV"
+          >
+            <span class="icon is-small"><i class="fas fa-file-csv"></i></span>
+            <span>Export CSV</span>
+          </button>
           <div class="dropdown is-hoverable is-right">
             <div class="dropdown-trigger">
               <button

@@ -5,6 +5,14 @@
 
     <div class="field">
       <p class="control has-icons-left">
+        <input #usernameInput class="input" type="text" placeholder="Username">
+        <span class="icon is-small is-left">
+          <i class="fas fa-user"></i>
+        </span>
+      </p>
+    </div>
+    <div class="field">
+      <p class="control has-icons-left">
         <input #emailInput class="input" type="email" placeholder="Email">
         <span class="icon is-small is-left">
           <i class="fas fa-envelope"></i>
@@ -21,7 +29,7 @@
     </div>
     <div class="field" style="display: flex; justify-content: flex-end;">
       <p class="control">
-        <button class="button is-success has-text-white" [class.is-loading]="isLoading" [disabled]="isLoading" (click)="onSignupButtonClicked(emailInput.value, pwInput.value)">
+        <button class="button is-success has-text-white" [class.is-loading]="isLoading" [disabled]="isLoading" (click)="onSignupButtonClicked(usernameInput.value, emailInput.value, pwInput.value)">
           Sign up
         </button>
       </p>

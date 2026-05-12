@@ -17,19 +17,20 @@ export class AuthService {
       shareReplay(),
       tap((res: HttpResponse<any>) => {
         // the auth tokens will be in the header of this response
-        this.setSession(res.body._id, res.headers.get('x-access-token'), res.headers.get('x-refresh-token'));
+        // Use email as username for login (since users set username during signup)
+        this.setSession(res.body._id, res.body.username || email, res.headers.get('x-access-token'), res.headers.get('x-refresh-token'));
         console.log("LOGGED IN!");
       })
     )
   }
 
 
-  signup(email: string, password: string) {
+  signup(username: string, email: string, password: string) {
     return this.webService.signup(email, password).pipe(
       shareReplay(),
       tap((res: HttpResponse<any>) => {
         // the auth tokens will be in the header of this response
-        this.setSession(res.body._id, res.headers.get('x-access-token'), res.headers.get('x-refresh-token'));
+        this.setSession(res.body._id, username, res.headers.get('x-access-token'), res.headers.get('x-refresh-token'));
         console.log("Successfully signed up and now logged in!");
       })
     )
@@ -55,18 +56,24 @@ export class AuthService {
     return localStorage.getItem('user-id');
   }
 
+  getUserName() {
+    return localStorage.getItem('user-name');
+  }
+
   setAccessToken(accessToken: string) {
     localStorage.setItem('x-access-token', accessToken)
   }
 
-  private setSession(userId: string, accessToken: string, refreshToken: string) {
+  private setSession(userId: string, username: string, accessToken: string, refreshToken: string) {
     localStorage.setItem('user-id', userId);
+    localStorage.setItem('user-name', username);
     localStorage.setItem('x-access-token', accessToken);
     localStorage.setItem('x-refresh-token', refreshToken);
   }
 
   private removeSession() {
     localStorage.removeItem('user-id');
+    localStorage.removeItem('user-name');
     localStorage.removeItem('x-access-token');
     localStorage.removeItem('x-refresh-token');
   }

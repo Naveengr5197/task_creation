@@ -32,6 +32,35 @@
   }
 }
 
+.profile-menu {
+  display: flex;
+  align-items: center;
+}
+
+.profile-btn {
+  color: white;
+  background: transparent;
+  border: none !important;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  font-size: 13px;
+
+  &:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+  }
+}
+
+.user-name {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 12px;
+}
+
 .task-manager-container {
   display: flex;
   width: 100%;
@@ -191,6 +220,10 @@
   }
 
   .logout-text {
+    display: none;
+  }
+
+  .user-name {
     display: none;
   }
 
