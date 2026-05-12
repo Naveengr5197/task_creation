@@ -26,6 +26,7 @@ export class TaskViewComponent implements OnInit {
   isSidebarOpen: boolean = false;
   userName: string = '';
 
+
   constructor(
     private taskService: TaskService,
     private route: ActivatedRoute,
