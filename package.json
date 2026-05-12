@@ -1,22 +1,16 @@
 {
-  "dependencies": {
-    "@angular/cli": "^8.3.8",
-    "@angular/forms": "^18.1.4",
-    "@angular/http": "^7.2.16",
-    "@angular/material": "^18.1.4"
-  },
-  "name": "foodmine-course",
+  "name": "task-creation",
   "version": "1.0.0",
   "engines": {
-    "node": ">=18"
+    "node": "14.x || 16.x"
   },
   "scripts": {
-    "dev": "cd frontend && npm start & cd backend && npm start",
-    "start": "cd backend/built && node server.js",
-    "prebuild": "cd backend && npm run build",
-    "build": "cd frontend && npm run build"
+    "dev": "cd frontend && npm start & cd api && npm run dev",
+    "start": "cd api && npm start",
+    "build": "cd frontend && npm run build",
+    "install:all": "cd api && npm install && cd ../frontend && npm install"
   },
   "devDependencies": {
-    "nodemon": "^3.1.10"
+    "nodemon": "^2.0.15"
   }
 }
