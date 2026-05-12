@@ -77,11 +77,15 @@ export class TaskViewComponent implements OnInit {
     });
   }
 
-  onDeleteListClick() {
+  onDeleteListClick(listId?: string) {
+    const id = listId || this.selectedListId;
     this.isDeletingList = true;
-    this.taskService.deleteList(this.selectedListId).subscribe((res: any) => {
+    this.taskService.deleteList(id).subscribe((res: any) => {
+      this.lists = this.lists.filter(l => l._id !== id);
       this.isDeletingList = false;
-      this.router.navigate(["/lists"]);
+      if (id === this.selectedListId) {
+        this.router.navigate(["/lists"]);
+      }
     });
   }
 
