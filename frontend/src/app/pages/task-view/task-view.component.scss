@@ -43,9 +43,13 @@
   border: none !important;
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   cursor: pointer;
   font-size: 13px;
+
+  .icon {
+    font-size: 24px;
+  }
 
   &:hover {
     background: rgba(255, 255, 255, 0.1);
@@ -224,7 +228,8 @@
   }
 
   .user-name {
-    display: none;
+    max-width: 100px;
+    font-size: 11px;
   }
 
   .profile-bar {
