@@ -2,7 +2,7 @@
   "name": "frontend",
   "version": "0.0.0",
   "engines": {
-    "node": "12.x || 14.x || 16.x"
+    "node": "24.x"
   },
   "scripts": {
     "build": "ng build --configuration production",
