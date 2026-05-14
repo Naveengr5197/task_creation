@@ -224,7 +224,7 @@ app.post('/lists/:listId/tasks', authenticate, (req, res) => {
         if (canCreateTask) {
             let newTask = new Task({
                 title: req.body.title,
-
+ 
                 amount: req.body.amount,
 
                 _listId: req.params.listId

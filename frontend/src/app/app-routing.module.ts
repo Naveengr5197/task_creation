@@ -20,6 +20,8 @@ const routes: Routes = [
   { path: 'lists/:listId/edit-task/:taskId', component: EditTaskComponent },
 ];
 
+
+
 @NgModule({
   imports: [RouterModule.forRoot(routes)],
   exports: [RouterModule]

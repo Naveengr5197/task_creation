@@ -4,6 +4,7 @@ import { ActivatedRoute, Params, Router } from "@angular/router";
 import { Task } from "src/app/models/task.model";
 import { List } from "src/app/models/list.model";
 import { AuthService } from "src/app/auth.service";
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: "app-task-view",
@@ -76,11 +77,15 @@ export class TaskViewComponent implements OnInit {
     });
   }
 
-  onDeleteListClick() {
+  onDeleteListClick(listId?: string) {
+    const id = listId || this.selectedListId;
     this.isDeletingList = true;
-    this.taskService.deleteList(this.selectedListId).subscribe((res: any) => {
+    this.taskService.deleteList(id).subscribe((res: any) => {
+      this.lists = this.lists.filter(l => l._id !== id);
       this.isDeletingList = false;
-      this.router.navigate(["/lists"]);
+      if (id === this.selectedListId) {
+        this.router.navigate(["/lists"]);
+      }
     });
   }
 
@@ -112,25 +117,28 @@ export class TaskViewComponent implements OnInit {
     if (!this.tasks || this.tasks.length === 0) return;
 
     const headers = ['Name', 'Amount'];
-    const rows = this.tasks.map(t => [
-      `"${(t.title || '').replace(/"/g, '""')}"`,
+    const data = this.tasks.map(t => [
+      t.title || '',
       t.amount
     ]);
 
     if (this.viewTotal) {
-      rows.push(['Total', this.sumOfAmount] as any);
+      data.push(['Total', this.sumOfAmount]);
     }
 
-    const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-    const selectedList = this.lists && this.lists.find(l => l._id === this.selectedListId);
-    const fileName = selectedList ? `${selectedList.title}.csv` : 'tasks.csv';
+    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Tasks');
 
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = fileName;
-    a.click();
-    URL.revokeObjectURL(url);
+    // Set column widths
+    ws['!cols'] = [
+      { wch: 30 }, // Name column
+      { wch: 15 }  // Amount column
+    ];
+
+    const selectedList = this.lists && this.lists.find(l => l._id === this.selectedListId);
+    const fileName = selectedList ? `${selectedList.title}.xlsx` : 'tasks.xlsx';
+
+    XLSX.writeFile(wb, fileName);
   }
 }
