@@ -1,6 +1,8 @@
 const express = require('express');
 const app = express();
 
+require('dotenv').config();
+
 const { mongoose } = require('./db/mongoose');
 
 const bodyParser = require('body-parser');
@@ -9,6 +11,32 @@ const bodyParser = require('body-parser');
 const { List, Task, User } = require('./db/models');
 
 const jwt = require('jsonwebtoken');
+const nodemailer = require('nodemailer');
+
+
+// Mailtrap SMTP email helper
+const sendResetEmail = async (toEmail, resetToken) => {
+    const transporter = nodemailer.createTransport({
+        host: process.env.MAILTRAP_HOST || 'sandbox.smtp.mailtrap.io',
+        port: Number(process.env.MAILTRAP_PORT || 2525),
+        auth: {
+            user: process.env.MAILTRAP_USER,
+            pass: process.env.MAILTRAP_PASS
+        }
+    });
+
+    const fromEmail = process.env.MAIL_FROM || 'noreply@taskmanager.com';
+    const frontendUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:4200';
+    const resetLink = `${frontendUrl}/forgot-password?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(toEmail)}`;
+
+    await transporter.sendMail({
+        from: fromEmail,
+        to: toEmail,
+        subject: 'Password Reset Request',
+        text: `You requested a password reset.\n\nYour reset code: ${resetToken}\n\nOr click this link: ${resetLink}\n\nThis code expires in 15 minutes.`,
+        html: `<h2>Password Reset</h2><p>Your reset code:</p><h3>${resetToken}</h3><p>Or <a href="${resetLink}">click here to reset your password</a></p><p>This code expires in 15 minutes.</p>`
+    });
+}
 
 
 /* MIDDLEWARE  */
@@ -371,7 +399,62 @@ app.post('/users/login', (req, res) => {
                 .send(user);
         })
     }).catch((e) => {
-        res.status(400).send(e);
+        res.status(400).send({ message: 'Invalid email or password' });
+    });
+})
+
+/**
+ * POST /users/forgot-password
+ * Purpose: Send a password reset email with a token
+ */
+app.post('/users/forgot-password', (req, res) => {
+    let email = req.body.email;
+
+    if (!email) {
+        return res.status(400).send({ message: 'Email is required' });
+    }
+
+    User.findOne({ email }).then((user) => {
+        if (!user) {
+            return res.send({ message: 'If an account with that email exists, a reset link has been sent.' });
+        }
+
+        return user.generatePasswordResetToken().then(async (resetToken) => {
+            try {
+                await sendResetEmail(email, resetToken);
+                return res.send({ message: 'If an account with that email exists, a reset link has been sent.' });
+            } catch (err) {
+                console.error('Email send error:', err.message);
+                return res.status(500).send({ message: 'Failed to send reset email. Please try again later.' });
+            }
+        });
+    }).catch((e) => {
+        res.status(400).send({ message: 'Something went wrong. Please try again.' });
+    });
+})
+
+/**
+ * POST /users/reset-password
+ * Purpose: Reset password using the emailed token
+ */
+app.post('/users/reset-password', (req, res) => {
+    let email = req.body.email;
+    let resetToken = req.body.resetToken;
+    let newPassword = req.body.newPassword;
+
+    if (!email || !resetToken || !newPassword) {
+        return res.status(400).send({ message: 'Email, reset token, and new password are required' });
+    }
+
+    User.findByPasswordResetCredentials(email, resetToken).then((user) => {
+        user.password = newPassword;
+        user.passwordResetToken = null;
+        user.passwordResetExpiresAt = null;
+        return user.save();
+    }).then(() => {
+        res.send({ message: 'Password reset successful. Please login with your new password.' });
+    }).catch(() => {
+        res.status(400).send({ message: 'Invalid or expired reset token.' });
     });
 })
 

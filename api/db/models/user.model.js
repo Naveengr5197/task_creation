@@ -35,7 +35,16 @@ const UserSchema = new mongoose.Schema({
             type: Number,
             required: true
         }
-    }]
+    }],
+    passwordResetToken: {
+        type: String,
+        required: false,
+        trim: true
+    },
+    passwordResetExpiresAt: {
+        type: Number,
+        required: false
+    }
 });
 
 
@@ -46,7 +55,31 @@ UserSchema.methods.toJSON = function () {
     const userObject = user.toObject();
 
     // return the document except the password and sessions (these shouldn't be made available)
-    return _.omit(userObject, ['password', 'sessions']);
+    return _.omit(userObject, ['password', 'sessions', 'passwordResetToken', 'passwordResetExpiresAt']);
+}
+
+UserSchema.methods.generatePasswordResetToken = function () {
+    const user = this;
+
+    return new Promise((resolve, reject) => {
+        crypto.randomBytes(32, (err, buf) => {
+            if (err) {
+                return reject(err);
+            }
+
+            const resetToken = buf.toString('hex');
+            const resetTokenTtlInSeconds = 15 * 60;
+
+            user.passwordResetToken = resetToken;
+            user.passwordResetExpiresAt = (Date.now() / 1000) + resetTokenTtlInSeconds;
+
+            user.save({ validateBeforeSave: false }).then(() => {
+                resolve(resetToken);
+            }).catch((e) => {
+                reject(e);
+            });
+        });
+    });
 }
 
 UserSchema.methods.generateAccessAuthToken = function () {
@@ -131,6 +164,26 @@ UserSchema.statics.findByCredentials = function (email, password) {
             })
         })
     })
+}
+
+UserSchema.statics.findByPasswordResetCredentials = function (email, resetToken) {
+    const User = this;
+
+    return User.findOne({
+        email,
+        passwordResetToken: resetToken
+    }).then((user) => {
+        if (!user) {
+            return Promise.reject();
+        }
+
+        const secondsSinceEpoch = Date.now() / 1000;
+        if (!user.passwordResetExpiresAt || user.passwordResetExpiresAt < secondsSinceEpoch) {
+            return Promise.reject();
+        }
+
+        return user;
+    });
 }
 
 UserSchema.statics.hasRefreshTokenExpired = (expiresAt) => {

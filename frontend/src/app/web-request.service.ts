@@ -48,5 +48,19 @@ export class WebRequestService {
       });
   }
 
+  forgotPassword(email: string) {
+    return this.http.post(`${this.ROOT_URL}/users/forgot-password`, {
+      email
+    });
+  }
+
+  resetPassword(email: string, resetToken: string, newPassword: string) {
+    return this.http.post(`${this.ROOT_URL}/users/reset-password`, {
+      email,
+      resetToken,
+      newPassword
+    });
+  }
+
 
 }

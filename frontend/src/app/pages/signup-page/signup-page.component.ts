@@ -13,6 +13,7 @@ export class SignupPageComponent implements OnInit {
   constructor(private authService: AuthService, private router: Router) { }
 
   isLoading: boolean = false;
+  showPassword: boolean = false;
 
   ngOnInit() {
   }
@@ -25,6 +26,10 @@ export class SignupPageComponent implements OnInit {
     }, (err) => {
       this.isLoading = false;
     });
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
 }
