@@ -13,6 +13,7 @@ import { WebReqInterceptor } from './web-req.interceptor';
 import { SignupPageComponent } from './pages/signup-page/signup-page.component';
 import { EditListComponent } from './pages/edit-list/edit-list.component';
 import { EditTaskComponent } from './pages/edit-task/edit-task.component';
+import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
 
 @NgModule({
   declarations: [
@@ -22,6 +23,7 @@ import { EditTaskComponent } from './pages/edit-task/edit-task.component';
     NewTaskComponent,
     LoginPageComponent,
     SignupPageComponent,
+    ForgotPasswordComponent,
     EditListComponent,
     EditTaskComponent,
   ],

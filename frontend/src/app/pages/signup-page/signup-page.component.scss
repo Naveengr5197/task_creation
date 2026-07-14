@@ -25,3 +25,15 @@
 .icon {
   color: rgba(255, 255, 255, 0.5) !important;
 }
+
+.control.has-icons-right .icon.is-right {
+  pointer-events: auto;
+}
+
+.password-toggle-btn {
+  background: transparent;
+  border: none;
+  color: rgba(255, 255, 255, 0.5);
+  cursor: pointer;
+  padding: 0;
+}

@@ -4,26 +4,34 @@
     <h1 class="title has-text-white">Sign up</h1>
 
     <div class="field">
+      <label class="label has-text-white" for="signup-username">Username</label>
       <p class="control has-icons-left">
-        <input #usernameInput class="input" type="text" placeholder="Username">
+        <input id="signup-username" #usernameInput class="input" type="text" placeholder="Username">
         <span class="icon is-small is-left">
           <i class="fas fa-user"></i>
         </span>
       </p>
     </div>
     <div class="field">
+      <label class="label has-text-white" for="signup-email">Email</label>
       <p class="control has-icons-left">
-        <input #emailInput class="input" type="email" placeholder="Email">
+        <input id="signup-email" #emailInput class="input" type="email" placeholder="Email">
         <span class="icon is-small is-left">
           <i class="fas fa-envelope"></i>
         </span>
       </p>
     </div>
     <div class="field">
-      <p class="control has-icons-left">
-        <input #pwInput class="input" type="password" placeholder="Password">
+      <label class="label has-text-white" for="signup-password">Password</label>
+      <p class="control has-icons-left has-icons-right">
+        <input id="signup-password" #pwInput class="input" [type]="showPassword ? 'text' : 'password'" placeholder="Password">
         <span class="icon is-small is-left">
           <i class="fas fa-lock"></i>
+        </span>
+        <span class="icon is-small is-right">
+          <button class="password-toggle-btn" type="button" aria-label="Toggle password visibility" (click)="togglePasswordVisibility()">
+            <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+          </button>
         </span>
       </p>
     </div>
