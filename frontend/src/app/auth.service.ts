@@ -36,6 +36,14 @@ export class AuthService {
     )
   }
 
+  forgotPassword(email: string) {
+    return this.webService.forgotPassword(email);
+  }
+
+  resetPassword(email: string, resetToken: string, newPassword: string) {
+    return this.webService.resetPassword(email, resetToken, newPassword);
+  }
+
 
 
   logout() {

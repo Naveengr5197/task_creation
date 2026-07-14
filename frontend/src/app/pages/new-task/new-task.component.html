@@ -13,7 +13,7 @@
     <br>
     <div class="buttons is-right">
       <button class="button is-medium" (click)="onCancelClicked()">Cancel</button>
-      <button class="button is-primary has-text-white is-medium" [class.is-loading]="isLoading" [disabled]="isLoading" (click)="createTask(UsernameInput.value, amountInput.value)">Add</button>
+      <button class="button is-primary has-text-white is-medium" [class.is-loading]="isLoading" [disabled]="isLoading" (click)="createTask(UsernameInput.value, +amountInput.value)">Add</button>
     </div>
   </div>
 </div>

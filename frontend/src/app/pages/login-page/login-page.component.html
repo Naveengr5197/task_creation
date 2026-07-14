@@ -4,18 +4,25 @@
     <h1 class="title has-text-white">Login</h1>
 
     <div class="field">
+      <label class="label has-text-white" for="login-email">Email</label>
       <p class="control has-icons-left">
-        <input #emailInput class="input" type="email" placeholder="Email">
+        <input id="login-email" #emailInput class="input" type="email" placeholder="Email">
         <span class="icon is-small is-left">
           <i class="fas fa-envelope"></i>
         </span>
       </p>
     </div>
     <div class="field">
-      <p class="control has-icons-left">
-        <input #pwInput class="input" type="password" placeholder="Password">
+      <label class="label has-text-white" for="login-password">Password</label>
+      <p class="control has-icons-left has-icons-right">
+        <input id="login-password" #pwInput class="input" [type]="showPassword ? 'text' : 'password'" placeholder="Password">
         <span class="icon is-small is-left">
           <i class="fas fa-lock"></i>
+        </span>
+        <span class="icon is-small is-right">
+          <button class="password-toggle-btn" type="button" aria-label="Toggle password visibility" (click)="togglePasswordVisibility()">
+            <i class="fas" [class.fa-eye]="!showPassword" [class.fa-eye-slash]="showPassword"></i>
+          </button>
         </span>
       </p>
     </div>
@@ -27,7 +34,13 @@
       </p>
     </div>
 
+    <div class="field" *ngIf="errorMessage">
+      <p class="has-text-danger">{{ errorMessage }}</p>
+    </div>
+
     <br>
+
+  <p class="has-text-white"><a routerLink="/forgot-password">Forgot password?</a></p>
 
     <p class="has-text-white">Not got an account? <a routerLink="/signup">Sign up</a> now!</p>
 

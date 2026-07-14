@@ -13,11 +13,14 @@ export class LoginPageComponent implements OnInit {
   constructor(private authService: AuthService, private router: Router) { }
 
   isLoading: boolean = false;
+  showPassword: boolean = false;
+  errorMessage: string = '';
 
   ngOnInit() {
   }
 
   onLoginButtonClicked(email: string, password: string) {
+    this.errorMessage = '';
     this.isLoading = true;
     this.authService.login(email, password).subscribe((res: HttpResponse<any>) => {
       this.isLoading = false;
@@ -26,7 +29,12 @@ export class LoginPageComponent implements OnInit {
       }
     }, (err) => {
       this.isLoading = false;
+      this.errorMessage = err?.error?.message || 'Login failed. Please check your email and password.';
     });
+  }
+
+  togglePasswordVisibility() {
+    this.showPassword = !this.showPassword;
   }
 
 }
