@@ -1,7 +1,7 @@
 {
   "version": 2,
-  "buildCommand": "",
-  "installCommand": "",
+  "installCommand": "npm install",
+  "buildCommand": "npx ng build --configuration production",
   "outputDirectory": "dist/frontend",
   "routes": [
     { "handle": "filesystem" },
