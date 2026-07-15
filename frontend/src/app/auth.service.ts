@@ -16,9 +16,7 @@ export class AuthService {
     return this.webService.login(email, password).pipe(
       shareReplay(),
       tap((res: HttpResponse<any>) => {
-        // the auth tokens will be in the header of this response
-        // Use email as username for login (since users set username during signup)
-        this.setSession(res.body._id, res.body.username || email, res.headers.get('x-access-token'), res.headers.get('x-refresh-token'));
+        this.setSession(res.body._id, res.body.username || email, res.headers.get('x-access-token'), res.headers.get('x-refresh-token'), res.body.role || 'member');
         console.log("LOGGED IN!");
       })
     )
@@ -29,8 +27,7 @@ export class AuthService {
     return this.webService.signup(username,email, password).pipe(
       shareReplay(),
       tap((res: HttpResponse<any>) => {
-        // the auth tokens will be in the header of this response
-        this.setSession(res.body._id, username, res.headers.get('x-access-token'), res.headers.get('x-refresh-token'));
+        this.setSession(res.body._id, username, res.headers.get('x-access-token'), res.headers.get('x-refresh-token'), res.body.role || 'member');
         console.log("Successfully signed up and now logged in!");
       })
     )
@@ -68,15 +65,29 @@ export class AuthService {
     return localStorage.getItem('user-name');
   }
 
+  getUserRole() {
+    return localStorage.getItem('user-role') || 'member';
+  }
+
+  isManager() {
+    const role = this.getUserRole();
+    return role === 'manager' || role === 'admin';
+  }
+
+  isAdmin() {
+    return this.getUserRole() === 'admin';
+  }
+
   setAccessToken(accessToken: string) {
     localStorage.setItem('x-access-token', accessToken)
   }
 
-  private setSession(userId: string, username: string, accessToken: string, refreshToken: string) {
+  private setSession(userId: string, username: string, accessToken: string, refreshToken: string, role: string = 'member') {
     localStorage.setItem('user-id', userId);
     localStorage.setItem('user-name', username);
     localStorage.setItem('x-access-token', accessToken);
     localStorage.setItem('x-refresh-token', refreshToken);
+    localStorage.setItem('user-role', role);
   }
 
   private removeSession() {
@@ -84,6 +95,7 @@ export class AuthService {
     localStorage.removeItem('user-name');
     localStorage.removeItem('x-access-token');
     localStorage.removeItem('x-refresh-token');
+    localStorage.removeItem('user-role');
   }
 
   getNewAccessToken() {

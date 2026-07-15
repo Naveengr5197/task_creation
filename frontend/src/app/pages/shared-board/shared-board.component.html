@@ -1,26 +1,23 @@
 <!-- Profile / Logout Bar -->
 <div class="profile-bar">
   <div class="profile-bar-content">
-    <button class="hamburger-btn" (click)="isSidebarOpen = !isSidebarOpen">
-      <span class="icon"><i class="fas" [ngClass]="isSidebarOpen ? 'fa-times' : 'fa-bars'"></i></span>
-    </button>
-    <span class="app-title">Task Manager</span>
+    <a routerLink="/lists" class="nav-link back-link">
+      <span class="icon"><i class="fas fa-arrow-left"></i></span>
+      <span>My Tasks</span>
+    </a>
+    <span class="app-title">Shared Board</span>
     <div class="profile-menu">
-      <a *ngIf="isManager" [routerLink]="['/shared-board']" class="nav-link" data-tooltip="Shared Board">
-        <span class="icon is-small"><i class="fas fa-globe"></i></span>
-        <span>Shared Board</span>
-      </a>
-      <a *ngIf="isAdmin" [routerLink]="['/user-management']" class="nav-link" data-tooltip="User Management">
+      <a *ngIf="isAdmin" routerLink="/user-management" class="nav-link">
         <span class="icon is-small"><i class="fas fa-users-cog"></i></span>
         <span>Users</span>
       </a>
       <div class="dropdown is-hoverable is-right">
         <div class="dropdown-trigger">
-          <div class="profile-trigger">
-            <span class="icon profile-icon"><i class="fas fa-user-circle"></i></span>
-            <span class="profile-name">{{ userName }}</span>
-            <span class="profile-role">{{ userRole }}</span>
-          </div>
+          <button class="button is-white is-small profile-btn">
+            <span class="icon is-small"><i class="fas fa-user-circle"></i></span>
+            <span class="user-name">{{ userName }}</span>
+            <span class="role-tag">{{ userRole }}</span>
+          </button>
         </div>
         <div class="dropdown-menu" role="menu">
           <div class="dropdown-content">
@@ -35,13 +32,14 @@
   </div>
 </div>
 
-<!-- Sidebar overlay for mobile -->
-<div class="sidebar-overlay" [class.is-active]="isSidebarOpen" (click)="isSidebarOpen = false"></div>
-
 <div class="centered-content">
   <div class="task-manager-container">
     <div class="sidebar" [class.is-open]="isSidebarOpen">
-      <h1 class="title has-text-white">Lists</h1>
+      <!-- Inline create list (moved to top) -->
+      <div class="inline-create">
+        <input class="input is-small" type="text" placeholder="New list name" [(ngModel)]="newListTitle" (keyup.enter)="onCreateList()">
+        <button class="button is-success is-small" [class.is-loading]="isCreatingList" (click)="onCreateList()">+ Add</button>
+      </div>
 
       <div class="list-menu">
         <div *ngIf="isLoadingLists" class="loading-spinner-small"></div>
@@ -49,21 +47,13 @@
           class="list-menu-item"
           *ngFor="let list of lists"
           routerLinkActive="is-active"
-          [routerLink]="['/lists', list._id]"
+          [routerLink]="['/shared-board', list._id]"
         >
           <p (click)="isSidebarOpen = false">{{ list.title }}</p>
           <div class="list-item-actions">
             <a
-              class="list-action-btn"
-              [routerLink]="['/edit-list', list._id]"
-              title="Edit list"
-              (click)="$event.stopPropagation()"
-            >
-              <i class="fas fa-edit"></i>
-            </a>
-            <a
               class="list-action-btn delete-btn"
-              (click)="$event.stopPropagation(); onDeleteListClick(list._id)"
+              (click)="$event.stopPropagation(); onDeleteList(list._id)"
               [class.is-disabled]="isDeletingList"
               title="Delete list"
             >
@@ -72,33 +62,18 @@
           </div>
         </div>
       </div>
-
-      <button class="button is-success has-text-white" routerLink="/new-list" (click)="isSidebarOpen = false">
-        + New List
-      </button>
     </div>
 
     <div class="task-list-container">
       <div *ngIf="tasks">
-        <div class="top-bar">
-          <button
-            routerLink="./new-task"
-            class="button is-primary add-task-btn"
-          >
+        <!-- Inline create task -->
+        <div class="inline-create-task">
+          <input class="input is-small" type="text" placeholder="Task name" [(ngModel)]="newTaskTitle">
+          <input class="input is-small amount-input" type="number" placeholder="Amt" [(ngModel)]="newTaskAmount">
+          <button class="button is-primary is-small" [class.is-loading]="isCreatingTask" (click)="onCreateTask()">
             <span class="icon is-small"><i class="fas fa-plus"></i></span>
-            <span>New Task</span>
+            <span>Add</span>
           </button>
-          <div class="top-bar-right">
-          <button
-            class="button is-info is-small export-btn"
-            (click)="exportToCSV()"
-            [disabled]="!tasks || tasks.length === 0"
-            title="Export to Excel"
-          >
-            <span class="icon is-small"><i class="fas fa-file-excel"></i></span>
-            <span>Export Excel</span>
-          </button>
-          </div>
         </div>
 
         <!-- Search & Filter Bar -->
@@ -129,7 +104,9 @@
                 <th>Status</th>
                 <th>Name</th>
                 <th>Amount</th>
+                <th>Created By</th>
                 <th>Created Date</th>
+                <th>Updated By</th>
                 <th>Updated Date</th>
                 <th>Actions</th>
               </tr>
@@ -143,32 +120,35 @@
                 </td>
                 <td [class.task-done]="task.completed">{{ task.title }}</td>
                 <td [class.task-done]="task.completed">{{ task.amount }}</td>
+                <td>{{ task.createdBy || '-' }}</td>
                 <td>{{ task.createdAt ? (task.createdAt | date:'short') : '-' }}</td>
+                <td>{{ task.updatedBy || '-' }}</td>
                 <td>{{ task.updatedAt ? (task.updatedAt | date:'short') : '-' }}</td>
                 <td>
-                  <div class="action-buttons">
-                    <button
-                      class="button is-small is-info"
-                      [routerLink]="['/lists', selectedListId, 'edit-task', task._id]"
-                    >
-                      <span class="icon is-small"><i class="fas fa-edit"></i></span>
-                    </button>
-                    <button
-                      class="button is-small is-danger"
-                      [class.is-loading]="deletingTaskId === task._id"
-                      (click)="onDeleteTaskClick(task._id)"
-                    >
-                      <span class="icon is-small"><i class="fas fa-trash"></i></span>
-                    </button>
-                  </div>
+                  <button
+                    class="button is-small is-info"
+                    (click)="onEditTask(task)"
+                    style="margin-right: 5px"
+                  >
+                    <span class="icon is-small"><i class="fas fa-edit"></i></span>
+                  </button>
+                  <button
+                    class="button is-small is-danger"
+                    [class.is-loading]="deletingTaskId === task._id"
+                    (click)="onDeleteTask(task._id)"
+                  >
+                    <span class="icon is-small"><i class="fas fa-trash"></i></span>
+                  </button>
                 </td>
               </tr>
             </tbody>
             <tfoot *ngIf="viewTotal">
-              <tr style="background: #f5f5f5; border-top: 2px solid #e0e0e0;">
+              <tr>
                 <td></td>
-                <td><strong style="color: #2c3e50;">Total</strong></td>
-                <td><strong style="color: #2c3e50;">{{ filteredTotal }}</strong></td>
+                <td><strong style="color: white;">Total</strong></td>
+                <td><strong style="color: white;">{{ filteredTotal }}</strong></td>
+                <td></td>
+                <td></td>
                 <td></td>
                 <td></td>
                 <td></td>
@@ -182,13 +162,42 @@
         </h3>
 
         <h3 class="empty-state-text" *ngIf="!isLoadingTasks && tasks.length === 0">
-          No tasks yet. Click "New Task" to add one.
+          No shared tasks yet. Add one above.
         </h3>
       </div>
 
-      <div *ngIf="!tasks">
-        <h3 class="empty-state-text">Please select a list from the sidebar</h3>
+      <div *ngIf="!tasks" class="select-list-prompt">
+        <p>Select a shared list or create one to get started.</p>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal" [class.is-active]="isEditModalOpen">
+  <div class="modal-background" (click)="onCloseEditModal()"></div>
+  <div class="modal-card">
+    <header class="modal-card-head">
+      <p class="modal-card-title">Edit Task</p>
+      <button class="delete" aria-label="close" (click)="onCloseEditModal()"></button>
+    </header>
+    <section class="modal-card-body">
+      <div class="field">
+        <label class="label">Task Name</label>
+        <div class="control">
+          <input class="input" type="text" [(ngModel)]="editTitle" placeholder="Task name">
+        </div>
+      </div>
+      <div class="field">
+        <label class="label">Amount</label>
+        <div class="control">
+          <input class="input" type="number" [(ngModel)]="editAmount" placeholder="Amount">
+        </div>
+      </div>
+    </section>
+    <footer class="modal-card-foot">
+      <button class="button is-success" [class.is-loading]="isSavingEdit" (click)="onSaveEdit()">Save</button>
+      <button class="button" (click)="onCloseEditModal()">Cancel</button>
+    </footer>
   </div>
 </div>

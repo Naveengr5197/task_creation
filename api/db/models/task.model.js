@@ -21,6 +21,25 @@ const TaskSchema = new mongoose.Schema({
     completed: {
         type: Boolean,
         default: false
+    },
+    createdBy: {
+        type: String,
+        trim: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedBy: {
+        type: String,
+        trim: true
+    },
+    updatedAt: {
+        type: Date
+    },
+    isShared: {
+        type: Boolean,
+        default: false
     }
 })
 

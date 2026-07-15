@@ -8,6 +8,8 @@ import { SignupPageComponent } from './pages/signup-page/signup-page.component';
 import { EditListComponent } from './pages/edit-list/edit-list.component';
 import { EditTaskComponent } from './pages/edit-task/edit-task.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { SharedBoardComponent } from './pages/shared-board/shared-board.component';
+import { UserManagementComponent } from './pages/user-management/user-management.component';
 
 const routes: Routes = [
   { path: '', redirectTo: '/lists', pathMatch: 'full' },
@@ -20,6 +22,9 @@ const routes: Routes = [
   { path: 'lists/:listId', component: TaskViewComponent },
   { path: 'lists/:listId/new-task', component: NewTaskComponent },
   { path: 'lists/:listId/edit-task/:taskId', component: EditTaskComponent },
+  { path: 'shared-board', component: SharedBoardComponent },
+  { path: 'shared-board/:listId', component: SharedBoardComponent },
+  { path: 'user-management', component: UserManagementComponent },
 ];
 
 

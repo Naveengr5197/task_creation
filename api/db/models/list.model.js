@@ -11,8 +11,26 @@ const ListSchema = new mongoose.Schema({
     _userId: {
         type: mongoose.Types.ObjectId,
         required: true
+    },
+    createdBy: {
+        type: String,
+        trim: true
+    },
+    createdAt: {
+        type: Date,
+        default: Date.now
+    },
+    updatedBy: {
+        type: String,
+        trim: true
+    },
+    updatedAt: {
+        type: Date
+    },
+    isShared: {
+        type: Boolean,
+        default: false
     }
-
 })
 
 const List = mongoose.model('List', ListSchema);
