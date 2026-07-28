@@ -130,7 +130,20 @@ let verifySession = (req, res, next) => {
 
 /* END MIDDLEWARE  */
 
-
+// Role-check middleware
+let authorizeRole = (...roles) => {
+    return (req, res, next) => {
+        User.findById(req.user_id).then((user) => {
+            if (!user || !roles.includes(user.role)) {
+                return res.status(403).send({ message: 'Access denied' });
+            }
+            req.userRole = user.role;
+            next();
+        }).catch(() => {
+            res.status(403).send({ message: 'Access denied' });
+        });
+    };
+}
 
 
 /* ROUTE HANDLERS */
@@ -143,9 +156,10 @@ let verifySession = (req, res, next) => {
  */
 app.get('/lists', authenticate, (req, res) => {
 
-    // We want to return an array of all the lists that belong to the authenticated user 
+    // Return only the logged-in user's private (non-shared) lists
     List.find({
-        _userId: req.user_id
+        _userId: req.user_id,
+        isShared: { $ne: true }
     }).then((lists) => {
         res.send(lists);
     }).catch((e) => {
@@ -158,18 +172,17 @@ app.get('/lists', authenticate, (req, res) => {
  * Purpose: Create a list
  */
 app.post('/lists', authenticate, (req, res) => {
-    // We want to create a new list and return the new list document back to the user (which includes the id)
-    // The list information (fields) will be passed in via the JSON request body
     let title = req.body.title;
 
     let newList = new List({
         title,
-        _userId: req.user_id
+        _userId: req.user_id,
+        isShared: false,
+        createdAt: new Date()
     });
     newList.save().then((listDoc) => {
-        // the full list document is returned (incl. id)
         res.send(listDoc);
-    })
+    });
 });
 
 /**
@@ -177,9 +190,9 @@ app.post('/lists', authenticate, (req, res) => {
  * Purpose: Update a specified list
  */
 app.patch('/lists/:id', authenticate, (req, res) => {
-    // We want to update the specified list (list document with id in the URL) with the new values specified in the JSON body of the request
+    const updateData = { ...req.body, updatedAt: new Date() };
     List.findOneAndUpdate({ _id: req.params.id, _userId: req.user_id }, {
-        $set: req.body
+        $set: updateData
     }).then(() => {
         res.send({ 'message': 'updated successfully'});
     });
@@ -234,32 +247,27 @@ app.get('/lists/:listId/tasks/:taskId', authenticate, (req, res) => {
  * Purpose: Create a new task in a specific list
  */
 app.post('/lists/:listId/tasks', authenticate, (req, res) => {
-    // We want to create a new task in a list specified by listId
 
     List.findOne({
         _id: req.params.listId,
         _userId: req.user_id
     }).then((list) => {
         if (list) {
-            // list object with the specified conditions was found
-            // therefore the currently authenticated user can create new tasks
             return true;
         }
-
-        // else - the list object is undefined
         return false;
     }).then((canCreateTask) => {
         if (canCreateTask) {
             let newTask = new Task({
                 title: req.body.title,
- 
                 amount: req.body.amount,
-
-                _listId: req.params.listId
+                _listId: req.params.listId,
+                isShared: false,
+                createdAt: new Date()
             });
             newTask.save().then((newTaskDoc) => {
                 res.send(newTaskDoc);
-            })
+            });
         } else {
             res.sendStatus(404);
         }
@@ -271,33 +279,28 @@ app.post('/lists/:listId/tasks', authenticate, (req, res) => {
  * Purpose: Update an existing task
  */
 app.patch('/lists/:listId/tasks/:taskId', authenticate, (req, res) => {
-    // We want to update an existing task (specified by taskId)
 
     List.findOne({
         _id: req.params.listId,
         _userId: req.user_id
     }).then((list) => {
         if (list) {
-            // list object with the specified conditions was found
-            // therefore the currently authenticated user can make updates to tasks within this list
             return true;
         }
-
-        // else - the list object is undefined
         return false;
     }).then((canUpdateTasks) => {
         if (canUpdateTasks) {
-            // the currently authenticated user can update tasks
+            const updateData = { ...req.body, updatedAt: new Date() };
             Task.findOneAndUpdate({
                 _id: req.params.taskId,
                 _listId: req.params.listId
             }, {
-                    $set: req.body
+                    $set: updateData
                 },
                 { runValidators: false }
             ).then(() => {
                 res.send({ message: 'Updated successfully.' })
-            })
+            });
         } else {
             res.sendStatus(404);
         }
@@ -383,6 +386,10 @@ app.post('/users/login', (req, res) => {
 
     User.findByCredentials(email, password).then((user) => {
 
+        if (user.isActive === false) {
+            return Promise.reject({ message: 'Your account has been deactivated. Please contact the administrator.' });
+        }
+
         return user.createSession().then((refreshToken) => {
             // Session created successfully - refreshToken returned.
             // now we geneate an access auth token for the user
@@ -399,7 +406,8 @@ app.post('/users/login', (req, res) => {
                 .send(user);
         })
     }).catch((e) => {
-        res.status(400).send({ message: 'Invalid email or password' });
+        const message = e && e.message ? e.message : 'Invalid email or password';
+        res.status(400).send({ message });
     });
 })
 
@@ -475,6 +483,193 @@ app.get('/users/me/access-token', verifySession, (req, res) => {
 
 
 /* HELPER METHODS */
+
+/* SHARED BOARD ROUTES (manager/admin only) */
+
+/**
+ * GET /shared/lists
+ * Purpose: Get all shared lists (visible to all authenticated users)
+ */
+app.get('/shared/lists', authenticate, (req, res) => {
+    List.find({ isShared: true }).then((lists) => {
+        res.send(lists);
+    }).catch((e) => {
+        res.send(e);
+    });
+})
+
+/**
+ * POST /shared/lists
+ * Purpose: Create a shared list (manager/admin only)
+ */
+app.post('/shared/lists', authenticate, authorizeRole('manager', 'admin'), (req, res) => {
+    User.findById(req.user_id).then((user) => {
+        let newList = new List({
+            title: req.body.title,
+            _userId: req.user_id,
+            isShared: true,
+            createdBy: user.username || user.email,
+            createdAt: new Date()
+        });
+        newList.save().then((listDoc) => {
+            res.send(listDoc);
+        });
+    });
+})
+
+/**
+ * PATCH /shared/lists/:id
+ */
+app.patch('/shared/lists/:id', authenticate, authorizeRole('manager', 'admin'), (req, res) => {
+    User.findById(req.user_id).then((user) => {
+        const updateData = { ...req.body, updatedBy: user.username || user.email, updatedAt: new Date() };
+        List.findOneAndUpdate({ _id: req.params.id, isShared: true }, {
+            $set: updateData
+        }).then(() => {
+            res.send({ message: 'updated successfully' });
+        });
+    });
+})
+
+/**
+ * DELETE /shared/lists/:id
+ */
+app.delete('/shared/lists/:id', authenticate, authorizeRole('manager', 'admin'), (req, res) => {
+    List.findOneAndRemove({
+        _id: req.params.id,
+        isShared: true
+    }).then((removedListDoc) => {
+        res.send(removedListDoc);
+        deleteTasksFromList(removedListDoc._id);
+    });
+})
+
+/**
+ * GET /shared/lists/:listId/tasks
+ */
+app.get('/shared/lists/:listId/tasks', authenticate, (req, res) => {
+    Task.find({ _listId: req.params.listId }).then((tasks) => {
+        res.send(tasks);
+    });
+})
+
+/**
+ * POST /shared/lists/:listId/tasks
+ */
+app.post('/shared/lists/:listId/tasks', authenticate, authorizeRole('manager', 'admin'), (req, res) => {
+    User.findById(req.user_id).then((user) => {
+        let newTask = new Task({
+            title: req.body.title,
+            amount: req.body.amount,
+            _listId: req.params.listId,
+            isShared: true,
+            createdBy: user.username || user.email,
+            createdAt: new Date()
+        });
+        newTask.save().then((newTaskDoc) => {
+            res.send(newTaskDoc);
+        });
+    });
+})
+
+/**
+ * PATCH /shared/lists/:listId/tasks/:taskId
+ */
+app.patch('/shared/lists/:listId/tasks/:taskId', authenticate, authorizeRole('manager', 'admin'), (req, res) => {
+    User.findById(req.user_id).then((user) => {
+        const updateData = { ...req.body, updatedBy: user.username || user.email, updatedAt: new Date() };
+        Task.findOneAndUpdate({
+            _id: req.params.taskId,
+            _listId: req.params.listId
+        }, { $set: updateData }, { runValidators: false }).then(() => {
+            res.send({ message: 'Updated successfully.' });
+        });
+    });
+})
+
+/**
+ * DELETE /shared/lists/:listId/tasks/:taskId
+ */
+app.delete('/shared/lists/:listId/tasks/:taskId', authenticate, authorizeRole('manager', 'admin'), (req, res) => {
+    Task.findOneAndRemove({
+        _id: req.params.taskId,
+        _listId: req.params.listId
+    }).then((removedTaskDoc) => {
+        res.send(removedTaskDoc);
+    });
+})
+
+
+/* ADMIN ROUTES (admin only) */
+
+/**
+ * GET /admin/users
+ * Purpose: Get all users with their roles
+ */
+app.get('/admin/users', authenticate, authorizeRole('admin'), (req, res) => {
+    User.find({}).then((users) => {
+        res.send(users);
+    }).catch((e) => {
+        res.status(400).send(e);
+    });
+})
+
+/**
+ * PATCH /admin/users/:userId/role
+ * Purpose: Update a user's role
+ */
+app.patch('/admin/users/:userId/role', authenticate, authorizeRole('admin'), (req, res) => {
+    const newRole = req.body.role;
+    if (!['member', 'manager', 'admin'].includes(newRole)) {
+        return res.status(400).send({ message: 'Invalid role. Must be member, manager, or admin.' });
+    }
+
+    User.findByIdAndUpdate(req.params.userId, { role: newRole }, { new: true }).then((user) => {
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        res.send(user);
+    }).catch((e) => {
+        res.status(400).send(e);
+    });
+})
+
+/**
+ * PATCH /admin/users/:userId/status
+ * Purpose: Toggle a user's active/inactive status
+ */
+app.patch('/admin/users/:userId/status', authenticate, authorizeRole('admin'), (req, res) => {
+    const isActive = req.body.isActive;
+    if (typeof isActive !== 'boolean') {
+        return res.status(400).send({ message: 'isActive must be true or false.' });
+    }
+
+    User.findByIdAndUpdate(req.params.userId, { isActive }, { new: true }).then((user) => {
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        res.send(user);
+    }).catch((e) => {
+        res.status(400).send(e);
+    });
+})
+
+/**
+ * GET /users/me
+ * Purpose: Get current user's profile including role
+ */
+app.get('/users/me', authenticate, (req, res) => {
+    User.findById(req.user_id).then((user) => {
+        if (!user) {
+            return res.status(404).send({ message: 'User not found' });
+        }
+        res.send(user);
+    }).catch((e) => {
+        res.status(400).send(e);
+    });
+})
+
+
 let deleteTasksFromList = (_listId) => {
     Task.deleteMany({
         _listId

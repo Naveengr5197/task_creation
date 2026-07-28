@@ -1,0 +1,148 @@
+<!-- Profile / Logout Bar -->
+<div class="profile-bar">
+  <div class="profile-bar-content">
+    <a routerLink="/lists" class="nav-link back-link">
+      <span class="icon"><i class="fas fa-arrow-left"></i></span>
+      <span>My Tasks</span>
+    </a>
+    <span class="app-title">User Management</span>
+    <div class="profile-menu">
+      <a *ngIf="isManager" routerLink="/shared-board" class="nav-link">
+        <span class="icon is-small"><i class="fas fa-globe"></i></span>
+        <span>Shared Board</span>
+      </a>
+      <div class="dropdown is-hoverable is-right">
+        <div class="dropdown-trigger">
+          <button class="button is-white is-small profile-btn">
+            <span class="icon is-small"><i class="fas fa-user-circle"></i></span>
+            <span class="user-name">{{ userName }}</span>
+            <span class="role-tag">{{ userRole }}</span>
+          </button>
+        </div>
+        <div class="dropdown-menu" role="menu">
+          <div class="dropdown-content">
+            <a class="dropdown-item has-text-danger" (click)="onLogoutClick()">
+              <span class="icon is-small"><i class="fas fa-sign-out-alt"></i></span>
+              <span>Logout</span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="centered-content">
+  <div class="user-management-container">
+
+    <!-- Toast Notification -->
+    <div class="toast-notification" *ngIf="successMessage" [class.is-visible]="successMessage">
+      <span class="icon"><i class="fas fa-check-circle"></i></span>
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <!-- Role Permissions Banner -->
+    <div class="role-banner">
+      <div class="role-cards">
+        <div class="role-card role-member">
+          <div class="role-card-count">{{ memberCount }}</div>
+          <div class="role-card-label">Members</div>
+          <div class="role-card-desc">Own data only</div>
+        </div>
+        <div class="role-card role-manager">
+          <div class="role-card-count">{{ managerCount }}</div>
+          <div class="role-card-label">Managers</div>
+          <div class="role-card-desc">+ Shared Board access</div>
+        </div>
+        <div class="role-card role-admin">
+          <div class="role-card-count">{{ adminCount }}</div>
+          <div class="role-card-label">Admins</div>
+          <div class="role-card-desc">+ User Management</div>
+        </div>
+        <div class="role-card role-total">
+          <div class="role-card-count">{{ users.length }}</div>
+          <div class="role-card-label">Total</div>
+          <div class="role-card-desc">All registered users</div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="loading-spinner"></div>
+
+    <!-- Search & Filter Bar -->
+    <div class="search-filter-bar sticky-bar" *ngIf="!isLoading">
+      <div class="search-box">
+        <span class="icon is-small"><i class="fas fa-search"></i></span>
+        <input class="input is-small" type="text" placeholder="Search by name or email..." [(ngModel)]="searchQuery">
+      </div>
+      <div class="filter-buttons">
+        <button class="button is-small" [class.is-active]="roleFilter === 'all'" (click)="roleFilter = 'all'">All Roles</button>
+        <button class="button is-small" [class.is-active]="roleFilter === 'member'" (click)="roleFilter = 'member'">Member</button>
+        <button class="button is-small" [class.is-active]="roleFilter === 'manager'" (click)="roleFilter = 'manager'">Manager</button>
+        <button class="button is-small" [class.is-active]="roleFilter === 'admin'" (click)="roleFilter = 'admin'">Admin</button>
+      </div>
+      <div class="filter-buttons">
+        <button class="button is-small" [class.is-active]="statusFilterValue === 'all'" (click)="statusFilterValue = 'all'">All Status</button>
+        <button class="button is-small" [class.is-active]="statusFilterValue === 'active'" (click)="statusFilterValue = 'active'">Active</button>
+        <button class="button is-small" [class.is-active]="statusFilterValue === 'inactive'" (click)="statusFilterValue = 'inactive'">Inactive</button>
+      </div>
+      <button class="button is-small is-light clear-btn" *ngIf="searchQuery || roleFilter !== 'all' || statusFilterValue !== 'all'" (click)="searchQuery = ''; roleFilter = 'all'; statusFilterValue = 'all'">
+        <span class="icon is-small"><i class="fas fa-times"></i></span>
+        <span>Clear</span>
+      </button>
+    </div>
+
+    <div class="user-table-wrapper" *ngIf="!isLoading">
+      <table class="table is-fullwidth is-striped is-hoverable">
+        <thead>
+          <tr>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Status</th>
+            <th>Current Role</th>
+            <th>Assign Role</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let user of filteredUsers" [class.inactive-row]="user.isActive === false">
+            <td>{{ user.username || '-' }}</td>
+            <td>{{ user.email }}</td>
+            <td>
+              <label class="toggle-switch" [class.is-disabled]="togglingUserId === user._id">
+                <input
+                  type="checkbox"
+                  [checked]="user.isActive !== false"
+                  (change)="onToggleStatus(user)"
+                  [disabled]="togglingUserId === user._id"
+                >
+                <span class="toggle-slider"></span>
+                <span class="toggle-label">{{ user.isActive !== false ? 'Active' : 'Inactive' }}</span>
+              </label>
+            </td>
+            <td>
+              <span class="tag" [ngClass]="getRoleBadgeClass(user.role)">{{ user.role || 'member' }}</span>
+            </td>
+            <td>
+              <div class="select is-small">
+                <select
+                  #roleSelect
+                  [value]="user.role || 'member'"
+                  (change)="onRoleChange(user._id, roleSelect.value)"
+                  [disabled]="updatingUserId === user._id"
+                >
+                  <option value="member">Member</option>
+                  <option value="manager">Manager</option>
+                  <option value="admin">Admin</option>
+                </select>
+              </div>
+              <span *ngIf="updatingUserId === user._id" class="icon is-small has-text-info">
+                <i class="fas fa-spinner fa-spin"></i>
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+</div>

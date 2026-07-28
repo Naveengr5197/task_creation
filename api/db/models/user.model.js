@@ -44,6 +44,15 @@ const UserSchema = new mongoose.Schema({
     passwordResetExpiresAt: {
         type: Number,
         required: false
+    },
+    role: {
+        type: String,
+        enum: ['member', 'manager', 'admin'],
+        default: 'member'
+    },
+    isActive: {
+        type: Boolean,
+        default: true
     }
 });
 

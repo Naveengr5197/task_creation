@@ -26,6 +26,26 @@ export class TaskViewComponent implements OnInit {
   deletingTaskId: string = null;
   isSidebarOpen: boolean = false;
   userName: string = '';
+  isManager: boolean = false;
+  isAdmin: boolean = false;
+  userRole: string = '';
+  searchQuery: string = '';
+  statusFilter: string = 'all';
+
+  get filteredTasks(): Task[] {
+    if (!this.tasks) return [];
+    return this.tasks.filter(t => {
+      const matchesSearch = !this.searchQuery || t.title.toLowerCase().includes(this.searchQuery.toLowerCase());
+      const matchesStatus = this.statusFilter === 'all' ||
+        (this.statusFilter === 'completed' && t.completed) ||
+        (this.statusFilter === 'pending' && !t.completed);
+      return matchesSearch && matchesStatus;
+    });
+  }
+
+  get filteredTotal(): number {
+    return this.filteredTasks.reduce((sum, t) => sum + t.amount, 0);
+  }
 
 
   constructor(
@@ -39,6 +59,9 @@ export class TaskViewComponent implements OnInit {
   //
   ngOnInit() {
     this.userName = this.authService.getUserName() || 'User';
+    this.isManager = this.authService.isManager();
+    this.isAdmin = this.authService.isAdmin();
+    this.userRole = this.authService.getUserRole();
     this.route.params.subscribe((params: Params) => {
       if (params.listId) {
         this.selectedListId = params.listId;
@@ -116,14 +139,16 @@ export class TaskViewComponent implements OnInit {
   exportToCSV() {
     if (!this.tasks || this.tasks.length === 0) return;
 
-    const headers = ['Name', 'Amount'];
+    const headers = ['Name', 'Amount', 'Created Date', 'Updated Date'];
     const data = this.tasks.map(t => [
       t.title || '',
-      t.amount
+      t.amount,
+      t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '',
+      t.updatedAt ? new Date(t.updatedAt).toLocaleDateString() : ''
     ]);
 
     if (this.viewTotal) {
-      data.push(['Total', this.sumOfAmount]);
+      data.push(['Total', this.sumOfAmount, '', '']);
     }
 
     const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
@@ -132,8 +157,10 @@ export class TaskViewComponent implements OnInit {
 
     // Set column widths
     ws['!cols'] = [
-      { wch: 30 }, // Name column
-      { wch: 15 }  // Amount column
+      { wch: 30 }, // Name
+      { wch: 15 }, // Amount
+      { wch: 15 }, // Created Date
+      { wch: 15 }  // Updated Date
     ];
 
     const selectedList = this.lists && this.lists.find(l => l._id === this.selectedListId);

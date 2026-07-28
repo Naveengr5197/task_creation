@@ -1,5 +1,6 @@
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -14,6 +15,8 @@ import { SignupPageComponent } from './pages/signup-page/signup-page.component';
 import { EditListComponent } from './pages/edit-list/edit-list.component';
 import { EditTaskComponent } from './pages/edit-task/edit-task.component';
 import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password.component';
+import { SharedBoardComponent } from './pages/shared-board/shared-board.component';
+import { UserManagementComponent } from './pages/user-management/user-management.component';
 
 @NgModule({
   declarations: [
@@ -24,6 +27,8 @@ import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password
     LoginPageComponent,
     SignupPageComponent,
     ForgotPasswordComponent,
+    SharedBoardComponent,
+    UserManagementComponent,
     EditListComponent,
     EditTaskComponent,
   ],
@@ -31,6 +36,7 @@ import { ForgotPasswordComponent } from './pages/forgot-password/forgot-password
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
+    FormsModule,
   ],
   providers: [
     { provide: HTTP_INTERCEPTORS, useClass: WebReqInterceptor, multi: true }

@@ -4,4 +4,8 @@ export class Task {
     title: string;
     completed: boolean;
     amount: number;
+    createdBy: string;
+    createdAt: string;
+    updatedBy: string;
+    updatedAt: string;
 }
