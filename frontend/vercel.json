@@ -1,11 +1,8 @@
 {
   "version": 2,
   "installCommand": "npm install",
-  "buildCommand": "npx ng build --configuration production",
+  "buildCommand": "NODE_OPTIONS=--openssl-legacy-provider npx ng build --configuration production",
   "outputDirectory": "dist/frontend",
-  "env": {
-    "NODE_OPTIONS": "--openssl-legacy-provider"
-  },
   "routes": [
     { "handle": "filesystem" },
     { "src": "/(.*)", "dest": "/index.html" }
