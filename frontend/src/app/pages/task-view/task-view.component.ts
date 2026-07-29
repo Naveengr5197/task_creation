@@ -25,6 +25,7 @@ export class TaskViewComponent implements OnInit {
   isDeletingList: boolean = false;
   deletingTaskId: string = null;
   isSidebarOpen: boolean = false;
+  isSettingsOpen: boolean = false;
   userName: string = '';
   isManager: boolean = false;
   isAdmin: boolean = false;

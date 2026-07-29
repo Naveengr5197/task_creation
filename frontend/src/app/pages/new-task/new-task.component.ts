@@ -14,6 +14,8 @@ export class NewTaskComponent implements OnInit {
 
   listId: string;
   isLoading: boolean = false;
+  taskName: string = '';
+  taskAmount: number = null;
 
   ngOnInit() {
     this.route.params.subscribe(

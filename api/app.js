@@ -14,18 +14,17 @@ const jwt = require('jsonwebtoken');
 const nodemailer = require('nodemailer');
 
 
-// Mailtrap SMTP email helper
+// Gmail SMTP email helper
 const sendResetEmail = async (toEmail, resetToken) => {
     const transporter = nodemailer.createTransport({
-        host: process.env.MAILTRAP_HOST || 'sandbox.smtp.mailtrap.io',
-        port: Number(process.env.MAILTRAP_PORT || 2525),
+        service: 'gmail',
         auth: {
-            user: process.env.MAILTRAP_USER,
-            pass: process.env.MAILTRAP_PASS
+            user: process.env.GMAIL_USER,
+            pass: process.env.GMAIL_APP_PASSWORD
         }
     });
 
-    const fromEmail = process.env.MAIL_FROM || 'noreply@taskmanager.com';
+    const fromEmail = process.env.GMAIL_USER;
     const frontendUrl = process.env.FRONTEND_BASE_URL || 'http://localhost:4200';
     const resetLink = `${frontendUrl}/forgot-password?token=${encodeURIComponent(resetToken)}&email=${encodeURIComponent(toEmail)}`;
 
