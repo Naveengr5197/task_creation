@@ -4,6 +4,7 @@ import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Task } from 'src/app/models/task.model';
 import { List } from 'src/app/models/list.model';
 import { AuthService } from 'src/app/auth.service';
+import * as XLSX from 'xlsx';
 
 @Component({
   selector: 'app-shared-board',
@@ -22,6 +23,7 @@ export class SharedBoardComponent implements OnInit {
   isDeletingList: boolean = false;
   deletingTaskId: string = null;
   isSidebarOpen: boolean = false;
+  isSettingsOpen: boolean = false;
   userName: string = '';
   isManager: boolean = false;
   isAdmin: boolean = false;
@@ -121,9 +123,10 @@ export class SharedBoardComponent implements OnInit {
   }
 
   onCreateTask() {
-    if (!this.newTaskTitle.trim() || this.newTaskAmount === null) return;
+    if (!this.newTaskTitle.trim()) return;
+    const amount = this.newTaskAmount || 0;
     this.isCreatingTask = true;
-    this.taskService.createSharedTask(this.newTaskTitle, this.newTaskAmount, this.selectedListId).subscribe((task: Task) => {
+    this.taskService.createSharedTask(this.newTaskTitle, amount, this.selectedListId).subscribe((task: Task) => {
       this.tasks.push(task);
       this.sumOfAmount += task.amount;
       this.viewTotal = true;
@@ -177,5 +180,43 @@ export class SharedBoardComponent implements OnInit {
 
   onLogoutClick() {
     this.authService.logout();
+  }
+
+  exportToExcel() {
+    if (!this.tasks || this.tasks.length === 0) return;
+
+    const headers = ['Name', 'Amount', 'Created By', 'Created Date', 'Updated By', 'Updated Date', 'Status'];
+    const data = this.tasks.map(t => [
+      t.title || '',
+      t.amount,
+      t.createdBy || '',
+      t.createdAt ? new Date(t.createdAt).toLocaleDateString() : '',
+      t.updatedBy || '',
+      t.updatedAt ? new Date(t.updatedAt).toLocaleDateString() : '',
+      t.completed ? 'Completed' : 'Pending'
+    ]);
+
+    if (this.viewTotal) {
+      data.push(['Total', this.sumOfAmount, '', '', '', '', '']);
+    }
+
+    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet([headers, ...data]);
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Shared Tasks');
+
+    ws['!cols'] = [
+      { wch: 30 },
+      { wch: 12 },
+      { wch: 18 },
+      { wch: 15 },
+      { wch: 18 },
+      { wch: 15 },
+      { wch: 12 }
+    ];
+
+    const selectedList = this.lists && this.lists.find(l => l._id === this.selectedListId);
+    const fileName = selectedList ? `shared_${selectedList.title}.xlsx` : 'shared_tasks.xlsx';
+
+    XLSX.writeFile(wb, fileName);
   }
 }

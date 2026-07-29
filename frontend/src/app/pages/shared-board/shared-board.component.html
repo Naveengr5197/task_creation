@@ -1,46 +1,50 @@
-<!-- Profile / Logout Bar -->
-<div class="profile-bar">
-  <div class="profile-bar-content">
-    <a routerLink="/lists" class="nav-link back-link">
-      <span class="icon"><i class="fas fa-arrow-left"></i></span>
-      <span>My Tasks</span>
+<!-- Top Header Bar -->
+<div class="header-bar">
+  <div class="header-left">
+    <button class="hamburger-btn" (click)="isSidebarOpen = !isSidebarOpen">
+      <span class="icon"><i class="fas" [ngClass]="isSidebarOpen ? 'fa-times' : 'fa-bars'"></i></span>
+    </button>
+    <a routerLink="/lists" class="back-link">
+      <i class="fas fa-arrow-left"></i>
     </a>
-    <span class="app-title">Shared Board</span>
-    <div class="profile-menu">
-      <a *ngIf="isAdmin" routerLink="/user-management" class="nav-link">
-        <span class="icon is-small"><i class="fas fa-users-cog"></i></span>
-        <span>Users</span>
-      </a>
-      <div class="dropdown is-hoverable is-right">
-        <div class="dropdown-trigger">
-          <button class="button is-white is-small profile-btn">
-            <span class="icon is-small"><i class="fas fa-user-circle"></i></span>
-            <span class="user-name">{{ userName }}</span>
-            <span class="role-tag">{{ userRole }}</span>
-          </button>
+    <span class="app-logo">
+      <i class="fas fa-globe"></i>
+      <span class="app-title">Shared Board</span>
+    </span>
+  </div>
+  <div class="header-right">
+    <div class="dropdown is-hoverable is-right">
+      <div class="dropdown-trigger">
+        <div class="profile-trigger">
+          <span class="icon profile-icon"><i class="fas fa-user-circle"></i></span>
+          <span class="profile-name">{{ userName }}</span>
+          <span class="profile-role">{{ userRole }}</span>
         </div>
-        <div class="dropdown-menu" role="menu">
-          <div class="dropdown-content">
-            <a class="dropdown-item has-text-danger" (click)="onLogoutClick()">
-              <span class="icon is-small"><i class="fas fa-sign-out-alt"></i></span>
-              <span>Logout</span>
-            </a>
-          </div>
+      </div>
+      <div class="dropdown-menu" role="menu">
+        <div class="dropdown-content">
+          <a class="dropdown-item has-text-danger" (click)="onLogoutClick()">
+            <span class="icon is-small"><i class="fas fa-sign-out-alt"></i></span>
+            <span>Logout</span>
+          </a>
         </div>
       </div>
     </div>
   </div>
 </div>
 
-<div class="centered-content">
-  <div class="task-manager-container">
-    <div class="sidebar" [class.is-open]="isSidebarOpen">
-      <!-- Inline create list (moved to top) -->
-      <div class="inline-create">
-        <input class="input is-small" type="text" placeholder="New list name" [(ngModel)]="newListTitle" (keyup.enter)="onCreateList()">
-        <button class="button is-success is-small" [class.is-loading]="isCreatingList" (click)="onCreateList()">+ Add</button>
-      </div>
+<!-- Sidebar overlay for mobile -->
+<div class="sidebar-overlay" [class.is-active]="isSidebarOpen" (click)="isSidebarOpen = false"></div>
 
+<div class="app-layout">
+  <!-- Sidebar -->
+  <div class="sidebar" [class.is-open]="isSidebarOpen">
+    <div class="sidebar-top">
+      <div class="sidebar-section-title">Shared Lists</div>
+      <div class="inline-create">
+        <input class="create-input" type="text" placeholder="New list name" [(ngModel)]="newListTitle" (keyup.enter)="onCreateList()">
+        <button class="create-btn" [class.is-loading]="isCreatingList" (click)="onCreateList()">+</button>
+      </div>
       <div class="list-menu">
         <div *ngIf="isLoadingLists" class="loading-spinner-small"></div>
         <div
@@ -48,15 +52,12 @@
           *ngFor="let list of lists"
           routerLinkActive="is-active"
           [routerLink]="['/shared-board', list._id]"
+          (click)="isSidebarOpen = false"
         >
-          <p (click)="isSidebarOpen = false">{{ list.title }}</p>
+          <span class="list-icon"><i class="fas fa-list"></i></span>
+          <p>{{ list.title }}</p>
           <div class="list-item-actions">
-            <a
-              class="list-action-btn delete-btn"
-              (click)="$event.stopPropagation(); onDeleteList(list._id)"
-              [class.is-disabled]="isDeletingList"
-              title="Delete list"
-            >
+            <a class="list-action-btn delete-btn" (click)="$event.stopPropagation(); onDeleteList(list._id)" [class.is-disabled]="isDeletingList" title="Delete list">
               <i class="fas fa-trash"></i>
             </a>
           </div>
@@ -64,111 +65,134 @@
       </div>
     </div>
 
-    <div class="task-list-container">
-      <div *ngIf="tasks">
-        <!-- Inline create task -->
-        <div class="inline-create-task">
-          <input class="input is-small" type="text" placeholder="Task name" [(ngModel)]="newTaskTitle">
-          <input class="input is-small amount-input" type="number" placeholder="Amt" [(ngModel)]="newTaskAmount">
-          <button class="button is-primary is-small" [class.is-loading]="isCreatingTask" (click)="onCreateTask()">
-            <span class="icon is-small"><i class="fas fa-plus"></i></span>
-            <span>Add</span>
+    <div class="sidebar-bottom">
+      <a routerLink="/lists" class="sidebar-link" (click)="isSidebarOpen = false">
+        <span class="icon"><i class="fas fa-tasks"></i></span>
+        <span>My Tasks</span>
+      </a>
+      <div class="sidebar-section" *ngIf="isAdmin">
+        <div class="sidebar-link parent-link" (click)="isSettingsOpen = !isSettingsOpen">
+          <span class="icon"><i class="fas fa-cog"></i></span>
+          <span>Settings</span>
+          <i class="fas fa-chevron-down settings-chevron" [class.rotated]="isSettingsOpen"></i>
+        </div>
+        <div class="sidebar-children" [class.open]="isSettingsOpen">
+          <a routerLink="/user-management" class="sidebar-child-link" (click)="isSidebarOpen = false">
+            <span class="icon"><i class="fas fa-users-cog"></i></span>
+            <span>User Management</span>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="main-content">
+    <div *ngIf="tasks">
+      <!-- Content Header -->
+      <div class="content-header">
+        <h2 class="page-title">Shared Tasks</h2>
+        <div class="header-actions">
+          <button class="export-btn" (click)="exportToExcel()" [disabled]="!tasks || tasks.length === 0">
+            <i class="fas fa-file-excel"></i> Download report
           </button>
         </div>
-
-        <!-- Search & Filter Bar -->
-        <div class="search-filter-bar sticky-bar">
-          <div class="search-box">
-            <span class="icon is-small"><i class="fas fa-search"></i></span>
-            <input class="input is-small" type="text" placeholder="Search tasks..." [(ngModel)]="searchQuery">
-          </div>
-          <div class="filter-buttons">
-            <button class="button is-small" [class.is-active]="statusFilter === 'all'" (click)="statusFilter = 'all'">All</button>
-            <button class="button is-small" [class.is-active]="statusFilter === 'pending'" (click)="statusFilter = 'pending'">Pending</button>
-            <button class="button is-small" [class.is-active]="statusFilter === 'completed'" (click)="statusFilter = 'completed'">Completed</button>
-          </div>
-          <button class="button is-small is-light clear-btn" *ngIf="searchQuery || statusFilter !== 'all'" (click)="searchQuery = ''; statusFilter = 'all'">
-            <span class="icon is-small"><i class="fas fa-times"></i></span>
-            <span>Clear</span>
-          </button>
-        </div>
-
-        <!-- Loading Tasks -->
-        <div *ngIf="isLoadingTasks" class="loading-spinner"></div>
-
-        <!-- Tasks Table -->
-        <div class="task-table-wrapper" *ngIf="!isLoadingTasks && filteredTasks.length > 0">
-          <table class="table is-fullwidth is-striped is-hoverable">
-            <thead>
-              <tr>
-                <th>Status</th>
-                <th>Name</th>
-                <th>Amount</th>
-                <th>Created By</th>
-                <th>Created Date</th>
-                <th>Updated By</th>
-                <th>Updated Date</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let task of filteredTasks" [class.completed]="task.completed">
-                <td>
-                  <span class="icon is-small" style="cursor: pointer" (click)="onTaskClick(task)">
-                    <i class="far" [ngClass]="task.completed ? 'fa-check-circle has-text-success' : 'fa-circle'"></i>
-                  </span>
-                </td>
-                <td [class.task-done]="task.completed">{{ task.title }}</td>
-                <td [class.task-done]="task.completed">{{ task.amount }}</td>
-                <td>{{ task.createdBy || '-' }}</td>
-                <td>{{ task.createdAt ? (task.createdAt | date:'short') : '-' }}</td>
-                <td>{{ task.updatedBy || '-' }}</td>
-                <td>{{ task.updatedAt ? (task.updatedAt | date:'short') : '-' }}</td>
-                <td>
-                  <button
-                    class="button is-small is-info"
-                    (click)="onEditTask(task)"
-                    style="margin-right: 5px"
-                  >
-                    <span class="icon is-small"><i class="fas fa-edit"></i></span>
-                  </button>
-                  <button
-                    class="button is-small is-danger"
-                    [class.is-loading]="deletingTaskId === task._id"
-                    (click)="onDeleteTask(task._id)"
-                  >
-                    <span class="icon is-small"><i class="fas fa-trash"></i></span>
-                  </button>
-                </td>
-              </tr>
-            </tbody>
-            <tfoot *ngIf="viewTotal">
-              <tr>
-                <td></td>
-                <td><strong style="color: white;">Total</strong></td>
-                <td><strong style="color: white;">{{ filteredTotal }}</strong></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-                <td></td>
-              </tr>
-            </tfoot>
-          </table>
-        </div>
-
-        <h3 class="empty-state-text" *ngIf="!isLoadingTasks && tasks.length > 0 && filteredTasks.length === 0">
-          No tasks match your search/filter.
-        </h3>
-
-        <h3 class="empty-state-text" *ngIf="!isLoadingTasks && tasks.length === 0">
-          No shared tasks yet. Add one above.
-        </h3>
       </div>
 
-      <div *ngIf="!tasks" class="select-list-prompt">
-        <p>Select a shared list or create one to get started.</p>
+      <!-- Inline create task -->
+      <div class="create-task-bar">
+        <input class="task-input" type="text" placeholder="Task name" [(ngModel)]="newTaskTitle">
+        <input class="task-input amount" type="number" placeholder="Amount" [(ngModel)]="newTaskAmount">
+        <button class="add-task-btn" [class.is-loading]="isCreatingTask" [disabled]="!newTaskTitle?.trim() || newTaskAmount === null || newTaskAmount === undefined" (click)="onCreateTask()">
+          <i class="fas fa-plus"></i> Add Task
+        </button>
       </div>
+
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="filter-pills">
+          <button class="pill" [class.active]="statusFilter === 'all'" (click)="statusFilter = 'all'">All</button>
+          <button class="pill" [class.active]="statusFilter === 'pending'" (click)="statusFilter = 'pending'">Pending</button>
+          <button class="pill" [class.active]="statusFilter === 'completed'" (click)="statusFilter = 'completed'">Completed</button>
+        </div>
+        <div class="search-box">
+          <span class="search-icon"><i class="fas fa-search"></i></span>
+          <input class="search-input" type="text" placeholder="Search tasks..." [(ngModel)]="searchQuery">
+        </div>
+        <button class="clear-btn" *ngIf="searchQuery || statusFilter !== 'all'" (click)="searchQuery = ''; statusFilter = 'all'">
+          <i class="fas fa-times"></i> Clear
+        </button>
+      </div>
+
+      <!-- Loading Tasks -->
+      <div *ngIf="isLoadingTasks" class="loading-spinner"></div>
+
+      <!-- Tasks Table -->
+      <div class="task-table-wrapper" *ngIf="!isLoadingTasks && filteredTasks.length > 0">
+        <table class="task-table">
+          <thead>
+            <tr>
+              <th>Status</th>
+              <th>Name</th>
+              <th>Amount</th>
+              <th>Created By</th>
+              <th>Created Date</th>
+              <th>Updated By</th>
+              <th>Updated Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let task of filteredTasks" [class.completed]="task.completed">
+              <td>
+                <span class="status-icon" (click)="onTaskClick(task)">
+                  <i class="far" [ngClass]="task.completed ? 'fa-check-circle completed-icon' : 'fa-circle pending-icon'"></i>
+                </span>
+              </td>
+              <td [class.task-done]="task.completed">{{ task.title }}</td>
+              <td [class.task-done]="task.completed">{{ task.amount }}</td>
+              <td>{{ task.createdBy || '-' }}</td>
+              <td>{{ task.createdAt ? (task.createdAt | date:'MMM d, yyyy') : '-' }}</td>
+              <td>{{ task.updatedBy || '-' }}</td>
+              <td>{{ task.updatedAt ? (task.updatedAt | date:'MMM d, yyyy') : '-' }}</td>
+              <td>
+                <div class="action-buttons">
+                  <button class="action-btn edit-btn" (click)="onEditTask(task)">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="action-btn delete-btn" [class.is-loading]="deletingTaskId === task._id" (click)="onDeleteTask(task._id)">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot *ngIf="viewTotal">
+            <tr>
+              <td></td>
+              <td><strong>Total</strong></td>
+              <td><strong>{{ filteredTotal }}</strong></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+            </tr>
+          </tfoot>
+        </table>
+      </div>
+
+      <h3 class="empty-state-text" *ngIf="!isLoadingTasks && tasks.length > 0 && filteredTasks.length === 0">
+        No tasks match your search/filter.
+      </h3>
+
+      <h3 class="empty-state-text" *ngIf="!isLoadingTasks && tasks.length === 0">
+        No shared tasks yet. Add one above.
+      </h3>
+    </div>
+
+    <div *ngIf="!tasks" class="empty-state-text">
+      <p>Select a shared list or create one to get started.</p>
     </div>
   </div>
 </div>
