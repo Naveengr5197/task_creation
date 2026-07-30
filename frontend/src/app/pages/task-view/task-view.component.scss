@@ -719,4 +719,15 @@
     font-size: 14px;
     margin-top: 40px;
   }
+
+  .list-menu-item {
+    .list-item-actions {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    &:hover {
+      background: transparent;
+    }
+  }
 }
